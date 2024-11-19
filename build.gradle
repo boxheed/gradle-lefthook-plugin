@@ -1,0 +1,67 @@
+buildscript {
+  repositories {
+    mavenCentral()
+    maven {
+      url "https://artifacts.fizzpod.com/public/mvn/"
+    }
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath ('com.fizzpod:gradle-plugin-opinion:19.0.0') {
+      exclude group: 'com.fizzpod', module: 'gradle-lefthook-plugin'
+    }
+  }
+}
+
+apply plugin: 'com.fizzpod.pater-build'
+apply plugin: 'com.fizzpod.lefthook'
+apply from: './buildSrc/build.gradle'
+
+sourceSets {
+  main {
+    java {
+      srcDir 'buildSrc/src/main/java'
+    }
+    resources {
+      srcDir 'buildSrc/src/main/resources'
+      exclude 'META-INF/gradle-plugins/com.fizzpod.lefthook.properties'
+    }
+    groovy {
+      srcDir 'buildSrc/src/main/groovy'
+    }
+  }
+  test {
+    java {
+      srcDir 'buildSrc/src/test/java'
+    }
+    resources {
+      srcDir 'buildSrc/src/test/resources'
+    }
+    groovy {
+      srcDir 'buildSrc/src/test/groovy'
+    }
+  }
+}
+
+gitSemver {
+  stable = false
+}
+
+dependencies {
+  api gradleApi()
+  api localGroovy()  
+}
+
+gradlePlugin {
+  plugins {
+    plugin {
+      description = 'Gradle plugin to integrate lefthook into a gradle project.'
+      tags.set(['lefthook', 'git hooks', 'git', 'hooks'])
+      id = 'com.fizzpod.lefthook'
+      displayName = 'Gradle Husky Plugin'
+      implementationClass = 'com.fizzpod.gradle.plugins.lefthook.LefthookPlugin'
+    }
+  }
+}

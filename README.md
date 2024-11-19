@@ -1,1 +1,1 @@
-# Gradle Husky Plugin
+# Gradle Lefthook Plugin

@@ -1,0 +1,10 @@
+build
+.gradle
+bin
+.classpath
+.project
+.settings
+.vscode
+.osv-scanner
+.git-semver
+.lefthook
