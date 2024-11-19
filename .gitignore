@@ -8,5 +8,5 @@ bin
 .osv-scanner
 .git-semver
 .lefthook
-lefthook
+./lefthook
 lefthook-local.yml
