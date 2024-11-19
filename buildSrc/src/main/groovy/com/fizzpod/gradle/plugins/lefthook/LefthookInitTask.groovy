@@ -46,11 +46,23 @@ public class LefthookInitTask extends DefaultTask {
         def status = Optional.ofNullable(context)
             .map(x -> LefthookInstallTask.location(x))
             .map(x -> LefthookInstallTask.install(x))
+            .map(x -> LefthookInitTask.writeLocal(x))
             .map(x -> LefthookInitTask.command(x))
             .map(x -> Command.execute(x))
             .orElseThrow(() -> new RuntimeException("Unable to run lefthook"))
         return status
     }
+
+    static def writeLocal = Loggy.wrap( { x ->
+            def binary = x.binary.getAbsolutePath()
+            def lefthookLocal = x.project.file('lefthook-local.yml')
+
+            lefthookLocal.withWriter { writer ->
+                writer.writeLine "rc: LEFTHOOK_BIN=${binary}"
+            }
+                
+            return x
+        })
 
     static def getOut = Loggy.wrap( { x -> 
             def out = x.sout? x.sout.trim(): ""
@@ -61,6 +73,7 @@ public class LefthookInitTask extends DefaultTask {
         def commandParts = []
         commandParts.add(x.binary.getAbsolutePath())
         commandParts.add("install")
+        commandParts.add("-f")
         x.command = commandParts.join(" ")
         return x
     } )

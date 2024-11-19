@@ -9,3 +9,4 @@ bin
 .git-semver
 .lefthook
 lefthook
+lefthook-local.yml
