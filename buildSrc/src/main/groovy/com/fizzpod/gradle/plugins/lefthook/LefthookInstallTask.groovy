@@ -7,7 +7,7 @@ import javax.inject.Inject
 
 public class LefthookInstallTask extends DefaultTask {
 
-    public static final String NAME = "installLefthook"
+    public static final String NAME = "lefthookInstall"
 
     public static final String GITSEMVER_INSTALL_DIR = ".lefthook"
 
