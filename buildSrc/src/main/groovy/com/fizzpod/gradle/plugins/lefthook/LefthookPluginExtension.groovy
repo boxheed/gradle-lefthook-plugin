@@ -8,5 +8,5 @@ public class LefthookPluginExtension {
     def os = null
     def arch = null
     def project = null
-
+    def autoInstall = true
 }

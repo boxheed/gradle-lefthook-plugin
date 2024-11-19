@@ -20,5 +20,12 @@ public class LefthookPlugin implements Plugin<Project> {
 		def localTask = LefthookLocalTask.register(project)
 		def installTask = LefthookInstallTask.register(project)
 		def installAllTask = LefthookInstallAllTask.register(project)
+
+		project.afterEvaluate { proj -> 
+			if(project.getExtensions().findByType(LefthookPluginExtension).autoInstall) {
+				Loggy.lifecycle("Auto installing lefthook")
+				installTask.runTask()
+			}
+		}
 	}
 }
