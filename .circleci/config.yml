@@ -1,0 +1,91 @@
+# Java Gradle CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-java/ for more details
+#
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      # specify the version you desire here
+      - image: cimg/openjdk:17.0
+    working_directory: ~/repo
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+    steps:
+      - run:
+          name: setup
+          command: source <(curl -s https://raw.githubusercontent.com/boxheed/shippable-scripts/master/java-build-ci-setup)
+      - checkout
+      - run: ./gradlew clean build
+  
+  security:
+    docker:
+      - image: cimg/openjdk:17.0
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run: ./gradlew --write-locks resolveAndLockAll
+      - run: ./gradlew osvInstall
+      - run: ./gradlew osvScan
+
+  release:
+    docker:
+      # specify the version you desire here
+      - image: cimg/openjdk:17.0
+    working_directory: ~/repo
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+    steps:
+      - run:
+          name: setup
+          command: source <(curl -s https://raw.githubusercontent.com/boxheed/shippable-scripts/master/java-build-ci-setup)
+      - checkout
+      - run: git config user.email "boxheed@users.noreply.github.com" && git config user.name "boxheed"
+      - run: ./gradlew tagSemver
+      - run: "git checkout develop && git merge $CIRCLE_BRANCH -m \"fix(release): merge $CIRCLE_BRANCH into develop\" --no-ff"
+      - run: git push --atomic origin main develop --tags
+ 
+  publish:
+    docker:
+      # specify the version you desire here
+      - image: cimg/openjdk:17.0
+    working_directory: ~/repo
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+    steps:
+      - run:
+          name: setup
+          command: source <(curl -s https://raw.githubusercontent.com/boxheed/shippable-scripts/master/java-build-ci-setup)
+      - checkout
+      - run: ./gradlew build publish publishPlugins githubRelease
+
+workflows:
+  build:
+    jobs:
+      - build:
+          context: boxhead-builds
+      - security:
+          context: boxhead-builds
+#      - release:
+#          context: boxhead-builds
+#          requires:
+#            - build
+#            - security
+#          filters:
+#            branches:
+#              only: /^(?:main|master)$/
+      - publish:
+          context: boxhead-builds
+          filters:
+            # only act on version tags
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+$/       
