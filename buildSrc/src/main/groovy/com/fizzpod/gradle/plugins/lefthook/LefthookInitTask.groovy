@@ -36,9 +36,9 @@ public class LefthookInitTask extends DefaultTask {
         context.extension = extension
         def result = LefthookInitTask.run(context)
         if(result.exit == 0) {
-            Loggy.lifecycle("Lefthook config: \n{}", result.sout? result.sout: "No Changes")
+            Loggy.lifecycle("Lefthook init: \n{}", result.sout? result.sout: "No Changes")
         } else {
-            Loggy.lifecycle("Lefthook config error: \n{}\n{}", result.serr, result.serr)
+            Loggy.lifecycle("Lefthook init error: \n{}\n{}", result.serr, result.serr)
         }
     }
 
@@ -46,7 +46,6 @@ public class LefthookInitTask extends DefaultTask {
         def status = Optional.ofNullable(context)
             .map(x -> LefthookDownloadTask.run(x))
             .map(x -> LefthookRcTask.run(x))
-            .map(x -> LefthookInitTask.writeRc(x))
             .map(x -> LefthookInitTask.writeLocal(x))
             .map(x -> LefthookInitTask.command(x))
             .map(x -> Command.execute(x))
