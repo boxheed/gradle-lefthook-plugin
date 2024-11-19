@@ -40,25 +40,10 @@ public class LefthookInstallTask extends DefaultTask {
 
     static def run = Loggy.wrap({ context ->
         return Optional.ofNullable(context)
-            .map(x -> LefthookInstallTask.location(x))
-            .map(x -> LefthookInstallTask.install(x))
+            .map(x -> LefthookDownloadTask.run(x))
+            .map(x -> LefthookRcTask.run(x))
+            .map(x -> LefthookLocalTask.run(x))
+            .map(x -> LefthookInitTask.run(x))
             .orElseThrow(() -> new RuntimeException("Unable to install lefthook"))
-    })
-
-    static def install = Loggy.wrap({ x ->
-        def repo = x.extension.repository
-        def arch = x.extension.arch
-        def os = x.extension.os
-        def version = x.extension.version
-        def location = x.location
-        x.binary = LefthookInstallation.install(repo, arch, os, version, location)
-        return x.binary? x: null
-    })
-
-    static def location = Loggy.wrap({ x ->
-        def projectDir = x.project.rootDir
-        def lefthookDir = x.extension.location
-        x.location = new File(projectDir, lefthookDir)
-        return x.location? x: null
     })
 }

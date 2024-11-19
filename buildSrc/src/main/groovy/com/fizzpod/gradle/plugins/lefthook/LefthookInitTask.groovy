@@ -44,8 +44,8 @@ public class LefthookInitTask extends DefaultTask {
 
     static def run = { context ->
         def status = Optional.ofNullable(context)
-            .map(x -> LefthookInstallTask.location(x))
-            .map(x -> LefthookInstallTask.install(x))
+            .map(x -> LefthookDownloadTask.run(x))
+            .map(x -> LefthookRcTask.run(x))
             .map(x -> LefthookInitTask.writeRc(x))
             .map(x -> LefthookInitTask.writeLocal(x))
             .map(x -> LefthookInitTask.command(x))
