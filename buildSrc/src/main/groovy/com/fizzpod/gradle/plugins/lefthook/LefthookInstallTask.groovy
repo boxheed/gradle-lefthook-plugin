@@ -57,8 +57,8 @@ public class LefthookInstallTask extends DefaultTask {
 
     static def location = Loggy.wrap({ x ->
         def projectDir = x.project.rootDir
-        def semverDir = x.extension.location
-        x.location = new File(projectDir, semverDir)
+        def lefthookDir = x.extension.location
+        x.location = new File(projectDir, lefthookDir)
         return x.location? x: null
     })
 }

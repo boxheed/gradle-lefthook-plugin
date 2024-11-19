@@ -14,5 +14,6 @@ public class LefthookPlugin implements Plugin<Project> {
 		extension.project = project
 		def installTask = LefthookInstallTask.register(project)
 		def installAllTask = LefthookInstallAllTask.register(project)
+		def versionTask = LefthookVersionTask.register(project)
 	}
 }
