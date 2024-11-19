@@ -8,3 +8,4 @@ bin
 .osv-scanner
 .git-semver
 .lefthook
+lefthook
