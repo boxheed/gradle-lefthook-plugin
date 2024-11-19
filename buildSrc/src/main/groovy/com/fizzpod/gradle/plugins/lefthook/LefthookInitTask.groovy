@@ -46,6 +46,7 @@ public class LefthookInitTask extends DefaultTask {
         def status = Optional.ofNullable(context)
             .map(x -> LefthookInstallTask.location(x))
             .map(x -> LefthookInstallTask.install(x))
+            .map(x -> LefthookInitTask.writeRc(x))
             .map(x -> LefthookInitTask.writeLocal(x))
             .map(x -> LefthookInitTask.command(x))
             .map(x -> Command.execute(x))
@@ -53,21 +54,31 @@ public class LefthookInitTask extends DefaultTask {
         return status
     }
 
-    static def writeLocal = Loggy.wrap( { x ->
-            def binary = x.binary.getAbsolutePath()
-            def lefthookLocal = x.project.file('lefthook-local.yml')
+    static def writeRc = Loggy.wrap( { x ->
+        def binary = x.binary.getAbsolutePath()
+        def rc = new File(x.location, ".lefthookrc")
+        def lefthookLocal = x.project.file('lefthook-local.yml')
+        rc.withWriter { writer ->
+            writer.writeLine "export LEFTHOOK_BIN=${binary}"
+        }
+        x.rc = rc
+        return x
+    })
 
-            lefthookLocal.withWriter { writer ->
-                writer.writeLine "rc: LEFTHOOK_BIN=${binary}"
-            }
-                
-            return x
-        })
+    static def writeLocal = Loggy.wrap( { x ->
+        def binary = x.binary.getAbsolutePath()
+        def lefthookLocal = x.project.file('lefthook-local.yml')
+        def rcPath = x.rc.getAbsolutePath()
+        lefthookLocal.withWriter { writer ->
+            writer.writeLine "rc: ${rcPath}"
+        }
+        return x
+    })
 
     static def getOut = Loggy.wrap( { x -> 
-            def out = x.sout? x.sout.trim(): ""
-            return out
-        })
+        def out = x.sout? x.sout.trim(): ""
+        return out
+    })
 
     static def command = Loggy.wrap( { x ->
         def commandParts = []
