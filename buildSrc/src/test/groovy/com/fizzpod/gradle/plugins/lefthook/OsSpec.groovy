@@ -19,6 +19,7 @@ public class OsSpec extends ProjectSpec {
         "MACOS"     | OS.Family.MAC
         "macos"    | OS.Family.MAC
         " macos"   | OS.Family.MAC
+        "macos "   | OS.Family.MAC
         ""          | null
         "banana"    | null
         null        | null
