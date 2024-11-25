@@ -29,11 +29,7 @@ public class LefthookHelpTask extends DefaultTask {
 
     @TaskAction
     def runTask() {
-
-        def extension = project[LefthookPlugin.NAME]
-        def context = [:]
-        context.project = project
-        context.extension = extension
+        def context = LefthookPluginHelper.createContext(project)
         def result = LefthookHelpTask.run(context)
         if(result.exit == 0) {
             Loggy.lifecycle("Lefthook help: \n{}", result.sout? result.sout: "No Changes")

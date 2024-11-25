@@ -37,16 +37,11 @@ public class LefthookDownloadAllTask extends DefaultTask {
 
     @TaskAction
     def runTask() {
-        def extension = project[LefthookPlugin.NAME]
-        def originalOs = extension.os
-        def originalArch = extension.arch
         for(def osArch: osArches) {
-            extension.os = osArch[0]
-            extension.arch = osArch[1]
-            Loggy.lifecycle("Installing {} : {}", extension.os, extension.arch)
-            def context = [:]
-            context.project = project
-            context.extension = extension
+            def context = LefthookPluginHelper.createContext(project)
+            context.extension.os = osArch[0]
+            context.extension.arch = osArch[1]
+            Loggy.lifecycle("Installing {} : {}", context.extension.os, context.extension.arch)
             LefthookDownloadTask.run(context)
         }
     }

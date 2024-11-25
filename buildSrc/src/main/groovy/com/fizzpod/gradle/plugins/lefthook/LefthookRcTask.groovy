@@ -29,11 +29,7 @@ public class LefthookRcTask extends DefaultTask {
 
     @TaskAction
     def runTask() {
-
-        def extension = project[LefthookPlugin.NAME]
-        def context = [:]
-        context.project = project
-        context.extension = extension
+        def context = LefthookPluginHelper.createContext(project)
         LefthookRcTask.run(context)
     }
 
@@ -53,6 +49,7 @@ public class LefthookRcTask extends DefaultTask {
         def rc = new File(x.location, ".lefthookrc")
         rc.withWriter { writer ->
             writer.writeLine "export LEFTHOOK_BIN=${binary}"
+            writer.writeLine x.extension.rc.call()
         }
         x.rc = rc
         return x

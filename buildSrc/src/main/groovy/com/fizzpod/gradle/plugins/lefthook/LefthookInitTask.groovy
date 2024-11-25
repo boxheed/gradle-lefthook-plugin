@@ -4,6 +4,7 @@ import org.gradle.api.Project
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import javax.inject.Inject
+import org.yaml.snakeyaml.Yaml
 
 public class LefthookInitTask extends DefaultTask {
 
@@ -29,11 +30,7 @@ public class LefthookInitTask extends DefaultTask {
 
     @TaskAction
     def runTask() {
-
-        def extension = project[LefthookPlugin.NAME]
-        def context = [:]
-        context.project = project
-        context.extension = extension
+        def context = LefthookPluginHelper.createContext(project)
         def result = LefthookInitTask.run(context)
         if(result.exit == 0) {
             Loggy.lifecycle("Lefthook init: \n{}", result.sout? result.sout: "No Changes")
@@ -47,6 +44,7 @@ public class LefthookInitTask extends DefaultTask {
             .map(x -> LefthookDownloadTask.run(x))
             .map(x -> LefthookRcTask.run(x))
             .map(x -> LefthookInitTask.writeLocal(x))
+            .map(x -> LefthookInitTask.writeConfig(x))
             .map(x -> LefthookInitTask.command(x))
             .map(x -> Command.execute(x))
             .orElseThrow(() -> new RuntimeException("Unable to run lefthook"))
@@ -70,6 +68,17 @@ public class LefthookInitTask extends DefaultTask {
         def rcPath = x.rc.getAbsolutePath()
         lefthookLocal.withWriter { writer ->
             writer.writeLine "rc: ${rcPath}"
+        }
+        return x
+    })
+
+    static def writeConfig = Loggy.wrap( { x ->
+        def binary = x.binary.getAbsolutePath()
+        def lefthookLocal = x.project.file('lefthook.yml')
+        def rcPath = x.rc.getAbsolutePath()
+        lefthookLocal.withWriter { writer ->
+            Yaml yaml = new Yaml()
+            yaml.dump(x.config, writer)
         }
         return x
     })

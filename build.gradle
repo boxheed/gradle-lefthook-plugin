@@ -45,6 +45,41 @@ sourceSets {
   }
 }
 
+lefthook {
+  options {
+    autoinstall = true
+    cheese = "brie"
+  }
+  config {
+    [
+      "assert_lefthook_installed": true,
+      "pre-commit": [
+        "follow": true,
+        "commands": [
+          "test": [
+            "glob": "*.{groovy,java}",
+            "run": "./gradlew test"
+          ]
+        ]
+      ]
+    ]
+  }
+
+  /*
+    abc = "def"
+    //pre-commit = "abc"
+    //{
+      //follow = true
+      commands {
+        test {
+          glob = "*.{groovy,java}"
+        }
+      }
+    //}
+  */
+  
+}
+
 gitSemver {
   stable = false
 }

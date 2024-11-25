@@ -31,10 +31,7 @@ public class LefthookInstallTask extends DefaultTask {
 
     @TaskAction
     def runTask() {
-        def extension = project[LefthookPlugin.NAME]
-        def context = [:]
-        context.project = project
-        context.extension = extension
+        def context = LefthookPluginHelper.createContext(project)
         LefthookInstallTask.run(context)
     }
 

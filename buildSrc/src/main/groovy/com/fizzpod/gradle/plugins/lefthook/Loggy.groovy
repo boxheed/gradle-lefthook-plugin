@@ -7,7 +7,7 @@ import org.codehaus.groovy.reflection.ReflectionUtils
 
 public class Loggy {
 
-    static LogLevel level = LogLevel.LIFECYCLE 
+    static LogLevel level = LogLevel.DEBUG 
 
     public static log(LogLevel level, String msg, Object... params) {
         def callingClass = getCallingClass()
@@ -83,7 +83,7 @@ public class Loggy {
         }
         def exitLog = { args ->
             def callingClass = getCallingClass()
-            Loggy.debug("{} Exit : {}", callingClass, args? args: "null")
+            Loggy.debug("{} Exit : {}", callingClass, args != null? args: "null")
             return args
         }
         return entryLog >> closure >> exitLog

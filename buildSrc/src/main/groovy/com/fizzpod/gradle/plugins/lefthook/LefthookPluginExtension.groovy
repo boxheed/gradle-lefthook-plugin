@@ -1,12 +1,39 @@
 package com.fizzpod.gradle.plugins.lefthook
 
-public class LefthookPluginExtension {
-    def version = "latest"
-    def location = ".lefthook"
-    def repository = "evilmartians/lefthook"
-    def prefix = "v"
-    def os = null
-    def arch = null
-    def project = null
-    def autoInstall = true
+public class LefthookPluginExtension implements GroovyInterceptable {
+    static def DEFAULT_OPTIONS = [
+        "version": "latest",
+        "location": ".lefthook",
+        "repository": "evilmartians/lefthook",
+        "prefix": "v",
+        "os": null,
+        "arch": null,
+        "project": null,
+        "autoInstall": true,
+        "rc": {""}
+    ]
+
+    def name
+    def config = [:]
+    def options
+
+    void setProperty(String key, value) {
+        Loggy.debug("setProperty: {}, {}", key, value)
+        config[key] = value
+    }
+   
+    def getProperty(String key) {
+        Loggy.debug("getProperty: {}", key)
+        if(key.equalsIgnoreCase("config")) {
+            return this.config
+        } else {
+            return this.config[key]
+        }
+    } 
+
+    def invokeMethod(String key, args) {
+        Loggy.debug("invokeMethod: {}, {}", key, args)
+        throw new RuntimeException(key)
+        config[key] = args
+    }
 }

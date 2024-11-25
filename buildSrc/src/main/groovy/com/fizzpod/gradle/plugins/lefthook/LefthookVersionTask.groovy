@@ -29,11 +29,7 @@ public class LefthookVersionTask extends DefaultTask {
 
     @TaskAction
     def runTask() {
-
-        def extension = project[LefthookPlugin.NAME]
-        def context = [:]
-        context.project = project
-        context.extension = extension
+        def context = LefthookPluginHelper.createContext(project)
         def result = LefthookVersionTask.run(context)
         if(result.exit == 0) {
             Loggy.lifecycle("Lefthook version: \n{}", result.sout? result.sout: "No Changes")
