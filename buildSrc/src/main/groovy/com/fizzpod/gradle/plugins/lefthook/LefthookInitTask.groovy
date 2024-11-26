@@ -44,6 +44,7 @@ public class LefthookInitTask extends DefaultTask {
             .map(x -> LefthookDownloadTask.run(x))
             .map(x -> LefthookRcTask.run(x))
             .map(x -> LefthookInitTask.writeLocal(x))
+            .map(x -> LefthookInitTask.resolveConfig(x))
             .map(x -> LefthookInitTask.writeConfig(x))
             .map(x -> LefthookInitTask.command(x))
             .map(x -> Command.execute(x))
@@ -72,13 +73,35 @@ public class LefthookInitTask extends DefaultTask {
         return x
     })
 
-    static def writeConfig = Loggy.wrap( { x ->
+    static def runConfigInstallers = Loggy.wrap( { x ->
         def binary = x.binary.getAbsolutePath()
+        def config = x.config
+        
+
         def lefthookLocal = x.project.file('lefthook.yml')
         def rcPath = x.rc.getAbsolutePath()
         lefthookLocal.withWriter { writer ->
             Yaml yaml = new Yaml()
             yaml.dump(x.config, writer)
+        }
+        return x
+    })
+
+    static def resolveConfig = Loggy.wrap( { x ->
+        if(x.config != null) {
+            x.config = LefthookPluginHelper.resolve(x.project, [], x.config)
+        }
+        return x
+    })
+
+    static def writeConfig = Loggy.wrap( { x ->
+        if(x.config != null) {
+            def binary = x.binary.getAbsolutePath()
+            def lefthook = x.project.file('lefthook.yml')
+            lefthook.withWriter { writer ->
+                Yaml yaml = new Yaml()
+                yaml.dump(x.config, writer)
+            }
         }
         return x
     })

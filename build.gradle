@@ -48,7 +48,6 @@ sourceSets {
 lefthook {
   options {
     autoinstall = true
-    cheese = "brie"
   }
   config {
     [
@@ -61,8 +60,41 @@ lefthook {
             "run": "./gradlew test"
           ]
         ]
+      ],
+      "commit-msg": [
+        "follow": true,
+        "scripts": [
+          {install "https://raw.githubusercontent.com/joaobsjunior/sh-conventional-commits/16dbdae09db941718750db62d4fdbd737da7784e/commit-msg"}: [
+            "runner": "bash"
+          ]
+        ]
       ]
     ]
+    /*
+
+    
+          
+          
+          {install "https://raw.githubusercontent.com/joaobsjunior/sh-conventional-commits/16dbdae09db941718750db62d4fdbd737da7784e/commit-msg"}
+    [
+      "assert_lefthook_installed": true,
+      "pre-commit": [
+        "follow": true,
+        "commands": [
+          "test": [
+            "glob": "*.{groovy,java}",
+            "run": "./gradlew test"
+          ]
+        ]
+        "scripts": [
+          "commit-msg": [
+            "runner": "bash"
+            "install": "https://raw.githubusercontent.com/joaobsjunior/sh-conventional-commits/16dbdae09db941718750db62d4fdbd737da7784e/commit-msg"
+          ]
+        ]
+      ]
+    ]
+    */
   }
 
   /*
