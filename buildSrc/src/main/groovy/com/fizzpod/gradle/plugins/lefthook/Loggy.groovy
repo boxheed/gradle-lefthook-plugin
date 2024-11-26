@@ -7,7 +7,7 @@ import org.codehaus.groovy.reflection.ReflectionUtils
 
 public class Loggy {
 
-    static LogLevel level = LogLevel.DEBUG 
+    static LogLevel level = LogLevel.LIFECYCLE 
 
     public static log(LogLevel level, String msg, Object... params) {
         def callingClass = getCallingClass()
