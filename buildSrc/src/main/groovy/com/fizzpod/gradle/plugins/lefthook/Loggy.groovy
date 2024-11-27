@@ -83,7 +83,7 @@ public class Loggy {
         }
         def exitLog = { args ->
             def callingClass = getCallingClass()
-            Loggy.debug("{} Exit : {}", callingClass, args? args: "null")
+            Loggy.debug("{} Exit : {}", callingClass, args != null? args: "null")
             return args
         }
         return entryLog >> closure >> exitLog

@@ -90,4 +90,5 @@ public class LefthookInstallation {
         x.arch = OS.getArch(x.params.arch)
         x.arch? x: null;
     }.memoize())
+
 }

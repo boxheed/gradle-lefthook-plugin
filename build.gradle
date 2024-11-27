@@ -45,6 +45,34 @@ sourceSets {
   }
 }
 
+lefthook {
+  options {
+    autoinstall = true
+  }
+  config {
+    [
+      "assert_lefthook_installed": true,
+      "pre-commit": [
+        "follow": true,
+        "commands": [
+          "test": [
+            "glob": "*.{groovy,java}",
+            "run": "./gradlew test"
+          ]
+        ]
+      ],
+      "commit-msg": [
+        "follow": true,
+        "scripts": [
+          {install "https://raw.githubusercontent.com/joaobsjunior/sh-conventional-commits/16dbdae09db941718750db62d4fdbd737da7784e/commit-msg"}: [
+            "runner": "bash"
+          ]
+        ]
+      ]
+    ]
+  }
+}
+
 gitSemver {
   stable = false
 }
@@ -60,7 +88,7 @@ gradlePlugin {
       description = 'Gradle plugin to integrate lefthook into a gradle project.'
       tags.set(['lefthook', 'git hooks', 'git', 'hooks'])
       id = 'com.fizzpod.lefthook'
-      displayName = 'Gradle Husky Plugin'
+      displayName = 'Gradle Lefthook Plugin'
       implementationClass = 'com.fizzpod.gradle.plugins.lefthook.LefthookPlugin'
     }
   }
