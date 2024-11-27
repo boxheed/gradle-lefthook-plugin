@@ -117,20 +117,4 @@ class LefthookPluginHelper {
         Loggy.debug("config resolved to {}", result)
         return result
     }
-
-/*
-
-        return rhs.inject(lhs.clone()) { map, entry ->
-            stack = stack + entry.key
-            if (map[entry.key] instanceof Map && entry.value instanceof Map) {
-                map[entry.key] = resolve(stack, map[entry.key], entry.value)
-            } else if (map[entry.key] instanceof Collection && entry.value instanceof Collection) {
-                map[entry.key] += entry.value
-            } else if(entry.value != null) {
-                map[entry.key] = entry.value
-            }
-            return map
-        }
-    }
-    */
 }

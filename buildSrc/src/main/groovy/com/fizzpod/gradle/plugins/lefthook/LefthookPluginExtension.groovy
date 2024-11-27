@@ -13,9 +13,8 @@ public class LefthookPluginExtension implements GroovyInterceptable {
         "rc": {""}
     ]
 
-    def name
     def config = [:]
-    def options
+    def options = [:]
 
     void setProperty(String key, value) {
         Loggy.debug("setProperty: {}, {}", key, value)

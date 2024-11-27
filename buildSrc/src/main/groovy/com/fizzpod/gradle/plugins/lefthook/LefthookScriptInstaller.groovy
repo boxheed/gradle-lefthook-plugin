@@ -109,13 +109,6 @@ public class LefthookScriptInstaller {
         def config = [:]
 
         config[hookName] = ["runner":"bash"]
-    /*
-            hookName: 
-            x.hookFile.getName(): [
-                "runner": "bash"
-            ]
-        ]
-        */
         return hookName
       //  return x
     })

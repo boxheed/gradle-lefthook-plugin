@@ -10,9 +10,7 @@ public class LefthookPlugin implements Plugin<Project> {
 	public static final String EXE_NAME = "lefthook"
 
 	void apply(Project project) {
-		//LefthookPluginExtension extension = createExtension(project)
 		createExtension(project)
-		//extension.project = project
 		def downloadTask = LefthookDownloadTask.register(project)
 		def downloadAllTask = LefthookDownloadAllTask.register(project)
 		def versionTask = LefthookVersionTask.register(project)
@@ -38,11 +36,6 @@ public class LefthookPlugin implements Plugin<Project> {
 	}
 
 	private void createExtension(project) {
-       // def container = project.container(LefthookPluginExtension) { name ->
-       //     new LefthookPluginExtension(name)
-        //}
 		project.extensions.create(NAME, LefthookPluginExtension)
-
-        //project.extensions.add(NAME, container)
     }
 }

@@ -70,46 +70,7 @@ lefthook {
         ]
       ]
     ]
-    /*
-
-    
-          
-          
-          {install "https://raw.githubusercontent.com/joaobsjunior/sh-conventional-commits/16dbdae09db941718750db62d4fdbd737da7784e/commit-msg"}
-    [
-      "assert_lefthook_installed": true,
-      "pre-commit": [
-        "follow": true,
-        "commands": [
-          "test": [
-            "glob": "*.{groovy,java}",
-            "run": "./gradlew test"
-          ]
-        ]
-        "scripts": [
-          "commit-msg": [
-            "runner": "bash"
-            "install": "https://raw.githubusercontent.com/joaobsjunior/sh-conventional-commits/16dbdae09db941718750db62d4fdbd737da7784e/commit-msg"
-          ]
-        ]
-      ]
-    ]
-    */
   }
-
-  /*
-    abc = "def"
-    //pre-commit = "abc"
-    //{
-      //follow = true
-      commands {
-        test {
-          glob = "*.{groovy,java}"
-        }
-      }
-    //}
-  */
-  
 }
 
 gitSemver {
