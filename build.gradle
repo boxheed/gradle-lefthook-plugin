@@ -88,7 +88,7 @@ gradlePlugin {
       description = 'Gradle plugin to integrate lefthook into a gradle project.'
       tags.set(['lefthook', 'git hooks', 'git', 'hooks'])
       id = 'com.fizzpod.lefthook'
-      displayName = 'Gradle Husky Plugin'
+      displayName = 'Gradle Lefthook Plugin'
       implementationClass = 'com.fizzpod.gradle.plugins.lefthook.LefthookPlugin'
     }
   }
