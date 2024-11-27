@@ -46,7 +46,6 @@ public class LefthookScriptInstaller {
     })
 
     static def resolveDownloader = Loggy.wrap( { x ->
-
         def resource = x.resource
         if(resource =~ "http.*") {
             x.downloader = LefthookScriptInstaller.httpDownloader
@@ -64,7 +63,23 @@ public class LefthookScriptInstaller {
     }
 
     static def classpathDownloader = { url, file ->
-        return x
+        def cleanUrl = url.replaceFirst("^classpath:", "")
+        URL resourceUrl = LefthookScriptInstaller.class.getResource(cleanUrl)
+        if (resourceUrl == null) {
+            throw new FileNotFoundException("Resource not found in classpath: ${url}")
+        }
+        
+        try {
+            resourceUrl.withInputStream { input ->
+                file.withOutputStream { output ->
+                    output << input
+                }
+            }
+            Loggy.info("File extracted successfully from classpath to ${file.absolutePath}")
+        } catch (IOException e) {
+            Loggy.error("Error extracting file from classpath: ${e.message}")
+            throw e
+        }
     }
 
     static def resolveHookLocation = Loggy.wrap( { x ->
