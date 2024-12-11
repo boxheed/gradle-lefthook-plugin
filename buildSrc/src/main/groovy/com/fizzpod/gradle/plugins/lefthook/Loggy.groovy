@@ -1,9 +1,10 @@
+/* (C) 2024 */
+/* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
-import org.gradle.api.logging.Logging
-import org.gradle.api.logging.LogLevel
-
 import org.codehaus.groovy.reflection.ReflectionUtils
+import org.gradle.api.logging.LogLevel
+import org.gradle.api.logging.Logging
 
 public class Loggy {
 

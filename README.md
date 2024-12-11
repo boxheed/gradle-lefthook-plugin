@@ -26,7 +26,9 @@ plugins {
 ```
 
 ## Usage
+
 Once the plugin is applied, you can configure Lefthook in your build.gradle file:
+
 ```groovy
 lefthook {
   options {
@@ -56,17 +58,20 @@ lefthook {
   }
 ```
 
-
 ## Configuration
+
 The plugin allows you to customize the Lefthook setup through the lefthook extension in your build.gradle:
 
 ## Contributing
+
 Contributions are welcome! Please fork the repository and submit a pull request with your changes. Ensure that your code adheres to the project's coding standards and includes appropriate tests.
 
 ## License
+
 This project is licensed under the Apache 2 License. See the LICENSE file for details.
 
 ## Acknowledgments
+
 [Lefthook](https://github.com/evilmartians/lefthook) - The Git hooks manager that this plugin integrates with.
 
 This README provides a comprehensive overview of the project, including installation instructions, usage examples, and contribution guidelines. Adjust the content as necessary to fit the specific details and features of your plugin.
