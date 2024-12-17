@@ -1,7 +1,9 @@
+/* (C) 2024 */
+/* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
-import org.gradle.api.Project
 import org.apache.commons.io.FileUtils
+import org.gradle.api.Project
 
 public class LefthookScriptInstaller {
 
@@ -16,7 +18,7 @@ public class LefthookScriptInstaller {
     def install(def resource) {
         def res = resource
         if(resource instanceof Closure) {
-            res = resource.call();
+            res = resource.call()
         }
         def context = LefthookPluginHelper.createContext(this.project)
         context.resource = res

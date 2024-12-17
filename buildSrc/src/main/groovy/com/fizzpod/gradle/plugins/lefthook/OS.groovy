@@ -1,3 +1,5 @@
+/* (C) 2024 */
+/* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
 import org.apache.commons.lang3.SystemUtils
@@ -68,7 +70,7 @@ public class OS {
             os = OS.Family.findByName(name)
         } 
         
-        return os;
+        return os
     }.memoize()
 
     static def getArch = { String name ->

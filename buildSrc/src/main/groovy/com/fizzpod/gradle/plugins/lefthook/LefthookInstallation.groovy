@@ -1,14 +1,16 @@
+/* (C) 2024 */
+/* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
-import org.gradle.api.Project
-import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.TaskAction
 import groovy.json.*
 import javax.inject.Inject
-import org.apache.commons.lang3.SystemUtils
 import org.apache.commons.io.FileUtils
-import org.rauschig.jarchivelib.ArchiverFactory
+import org.apache.commons.lang3.SystemUtils
+import org.gradle.api.DefaultTask
+import org.gradle.api.Project
+import org.gradle.api.tasks.TaskAction
 import org.rauschig.jarchivelib.ArchiveFormat
+import org.rauschig.jarchivelib.ArchiverFactory
 import org.rauschig.jarchivelib.CompressionType
 
 public class LefthookInstallation {
@@ -67,7 +69,7 @@ public class LefthookInstallation {
     static def getBinaryName = {version, os, arch ->
         def osId = os.id
         def archId = arch.id
-        def extension = os == OS.Family.WINDOWS? ".exe": "";
+        def extension = os == OS.Family.WINDOWS? ".exe": ""
         def name = "lefthook_${version}_${osId}_${archId}${extension}"
         return name
     }.memoize()
@@ -83,12 +85,12 @@ public class LefthookInstallation {
 
     static def os = Loggy.wrap({def x ->
         x.os = OS.getOs(x.params.os)
-        x.os? x: null;
+        x.os? x: null
     }.memoize())
 
     static def arch = Loggy.wrap({def x ->
         x.arch = OS.getArch(x.params.arch)
-        x.arch? x: null;
+        x.arch? x: null
     }.memoize())
 
 }
