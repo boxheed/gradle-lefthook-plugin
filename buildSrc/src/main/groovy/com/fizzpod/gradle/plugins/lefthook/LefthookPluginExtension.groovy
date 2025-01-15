@@ -12,7 +12,9 @@ public class LefthookPluginExtension implements GroovyInterceptable {
         "arch": null,
         "project": null,
         "autoInstall": true,
-        "rc": {""}
+        "rc": {""},
+        "ttl": 1000 * 60 * 60 * 24,
+        "binary": null
     ]
 
     def config = [:]
