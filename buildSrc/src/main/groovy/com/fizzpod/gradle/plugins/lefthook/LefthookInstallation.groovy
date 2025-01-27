@@ -40,6 +40,8 @@ public class LefthookInstallation {
     static def download = Loggy.wrap({ x ->
         if(!x.binary.exists()) {
             LefthookInstallation.downloadAndInstall(x.url, x.binary, x.os)
+        } else {
+            FileUtils.touch(x.binary)
         }
         return x.binary.exists()? x: null
     })

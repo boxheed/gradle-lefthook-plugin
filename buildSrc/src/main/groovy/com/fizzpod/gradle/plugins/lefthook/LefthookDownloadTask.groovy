@@ -70,20 +70,26 @@ public class LefthookDownloadTask extends DefaultTask {
         def binaryPattern = LefthookInstallation.getBinaryName("v?(\\d+\\.\\d+\\.\\d+)", os, arch) + ".*"
         location.listFiles().each { File file ->
             if (file.name =~ binaryPattern) {
-                Loggy.debug("Checking ${file.name}")
+                Loggy.info("Checking ${file.name}")
                 def lastModified = file.lastModified()
                 def timeDiff = currentTime - lastModified
                 if (timeDiff < ttl) { 
-                    Loggy.debug("${file.name} within ttl of ${ttl}")
+                    Loggy.info("${file.name} within ttl of ${ttl}")
                     if(latestBinary != null && latestBinary.lastModified() < file.lastModified()) {
                         latestBinary = file
                     } else if (latestBinary == null){
                         latestBinary = file
                     }
+                } else {
+                    Loggy.info("${file.name} outide ttl of ${ttl}")
                 }
             }
         }
-        Loggy.lifecycle("found lefthook binary: ${latestBinary}")
+        if(latestBinary == null) {
+            Loggy.info("lefthook not found")
+        } else {
+            Loggy.info("Using lefthook ${latestBinary}")
+        }
         return latestBinary
     }
 
