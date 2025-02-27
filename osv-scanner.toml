@@ -1,0 +1,9 @@
+[[IgnoredVulns]]
+id = "GHSA-22wj-vf5f-wrvj"
+reason = "H2 database not utilised in the way the vuln describes."
+
+
+[[IgnoredVulns]]
+id = "GHSA-pq2g-wx69-c263"
+ignoreUntil = 2025-04-01 # Optional exception expiry date
+reason = "Awaiting release of fix from transient dependency"
