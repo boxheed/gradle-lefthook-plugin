@@ -19,6 +19,12 @@ dependencies {
           require '1.26.2'
       }
     }
+    implementation('net.minidev:json-smart') {
+      because 'version 2.5.0 imported as a dependency has a vulnerability'
+      version {
+          require '2.5.2'
+      }
+    }
   }
 
   test {
