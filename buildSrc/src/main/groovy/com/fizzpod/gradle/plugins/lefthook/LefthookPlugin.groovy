@@ -1,4 +1,4 @@
-/* (C) 2024 */
+/* (C) 2024-2025 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
@@ -21,7 +21,6 @@ public class LefthookPlugin implements Plugin<Project> {
 		def initTask = LefthookInitTask.register(project)
 		def localTask = LefthookLocalTask.register(project)
 		def installTask = LefthookInstallTask.register(project)
-		def installAllTask = LefthookInstallAllTask.register(project)
 
 		project.afterEvaluate { proj -> 
 			def options = LefthookPluginHelper.getOptions(proj)

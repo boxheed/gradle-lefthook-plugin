@@ -1,4 +1,4 @@
-/* (C) 2024 */
+/* (C) 2024-2025 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
@@ -42,8 +42,7 @@ public class LefthookHelpTask extends DefaultTask {
 
     static def run = { context ->
         def status = Optional.ofNullable(context)
-            .map(x -> LefthookInstallTask.location(x))
-            .map(x -> LefthookInstallTask.install(x))
+            .map(x -> LefthookInstallTask.run(x))
             .map(x -> LefthookHelpTask.command(x))
             .map(x -> Command.execute(x))
             .orElseThrow(() -> new RuntimeException("Unable to run lefthook"))
