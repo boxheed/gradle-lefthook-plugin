@@ -30,28 +30,17 @@ class LefthookPluginHelper {
         def options = config["options"] != null? config["options"]: [:] 
         if(options instanceof Closure) {
             def optionsMap = [:]
+            options.resolveStrategy = Closure.DELEGATE_ONLY
             options.delegate = optionsMap
             options.call()
             options = optionsMap
         }
-        options = merge(options, LefthookPluginExtension.DEFAULT_OPTIONS)
+        options = merge(LefthookPluginExtension.DEFAULT_OPTIONS, options)
         Loggy.debug("Lefthook Plugin Options {}", options)
         return options
     })
 
     static def getConfig = Loggy.wrap( {Project project ->
-        Loggy.debug("Finding config")
-        def extension = getExtension(project, "options")
-        def config = extension != null? extension.config: [:]
-        config = config["config"] != null? config["config"]: [:] 
-        if(config instanceof Closure) {
-            config = config.call()
-        }
-        Loggy.debug("Lefthook Config {}", config)
-        return config
-    })
-
-    static def install = Loggy.wrap( {Project project ->
         Loggy.debug("Finding config")
         def extension = getExtension(project, "options")
         def config = extension != null? extension.config: [:]

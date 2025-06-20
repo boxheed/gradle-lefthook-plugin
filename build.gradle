@@ -45,9 +45,12 @@ sourceSets {
   }
 }
 
+
+
 lefthook {
   options = {
-    autoinstall = true
+    version = "latest"
+    autoInstall = true
   }
   config = {
     [
