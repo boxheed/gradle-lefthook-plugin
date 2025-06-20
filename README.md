@@ -11,7 +11,7 @@ The Gradle Lefthook Plugin is a tool that integrates Lefthook, a powerful Git ho
 
 ## Requirements
 
-- Java 8 or higher
+- Java 11 or higher
 - Gradle 5.0 or higher
 - Lefthook installed on your system (optional, as the plugin can install it for you)
 
@@ -33,6 +33,7 @@ Once the plugin is applied, you can configure Lefthook in your build.gradle file
 lefthook {
   options {
     autoinstall = false // sets autoinstall - defaut is true
+    version = "v1.11.12" //sets the version of lefthook - defaults to "latest"
   }
   config { // lefthook file as groovy maps. This will be converted to yaml and applied to the .efthho.yml file
     [
