@@ -10,7 +10,7 @@ dependencies {
   implementation 'com.squareup.okhttp3:okhttp:5.0.0'
   implementation 'org.yaml:snakeyaml:2.4'
   
-  testImplementation 'com.netflix.nebula:nebula-test:10.6.2'
+  testImplementation 'com.netflix.nebula:nebula-test:11.0.0'
 
   constraints {
     implementation('org.apache.commons:commons-compress') {
