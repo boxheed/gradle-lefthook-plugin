@@ -25,6 +25,12 @@ dependencies {
           require '2.5.2'
       }
     }
+    implementation('org.apache.commons:commons-lang3') {
+      because 'version 3.14.0 imported as a dependency has a vulnerability'
+      version {
+          require '3.18.0'
+      }
+    }
   }
 
   test {
