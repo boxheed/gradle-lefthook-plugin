@@ -21,7 +21,7 @@ To apply the Gradle Lefthook Plugin to your project, add the following to your `
 
 ```groovy
 plugins {
-    id 'com.example.lefthook' version '0.1.0'
+    id 'com.fizzpod.lefthook' version '0.3.0'
 }
 ```
 
@@ -33,9 +33,9 @@ Once the plugin is applied, you can configure Lefthook in your build.gradle file
 lefthook {
   options {
     autoinstall = false // sets autoinstall - defaut is true
-    version = "v1.11.12" //sets the version of lefthook - defaults to "latest"
+    version = "v1.11.12" // sets the version of lefthook - defaults to "latest"
   }
-  config { // lefthook file as groovy maps. This will be converted to yaml and applied to the .efthho.yml file
+  config { // lefthook file as groovy maps. This will be converted to yaml and applied to the lefthook.yml file
     [
       "assert_lefthook_installed": true,
       "pre-commit": [
@@ -57,6 +57,7 @@ lefthook {
       ]
     ]
   }
+}
 ```
 
 ## Configuration
