@@ -7,7 +7,7 @@ The Gradle Lefthook Plugin is a tool that integrates Lefthook, a powerful Git ho
 - Seamless integration of Lefthook with Gradle projects.
 - Easy configuration of Git hooks using Gradle tasks.
 - Supports all Lefthook features, including parallel execution and custom scripts.
-- Automatically installs Lefthook if not already present.
+- Automatically installs Lefthook during the `check` task if not already present.
 
 ## Requirements
 
@@ -32,7 +32,7 @@ Once the plugin is applied, you can configure Lefthook in your build.gradle file
 ```groovy
 lefthook {
   options {
-    autoinstall = false // sets autoinstall - defaut is true
+    autoInstall = false // sets autoInstall - default is true. When true, lefthook installation is triggered by the 'check' task.
     version = "v1.11.12" // sets the version of lefthook - defaults to "latest"
   }
   config { // lefthook file as groovy maps. This will be converted to yaml and applied to the lefthook.yml file

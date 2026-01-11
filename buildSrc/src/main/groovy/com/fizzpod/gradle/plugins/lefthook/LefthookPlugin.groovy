@@ -1,4 +1,4 @@
-/* (C) 2024-2025 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
@@ -30,7 +30,12 @@ public class LefthookPlugin implements Plugin<Project> {
 			Loggy.debug("Auto installing lefthook: {}", autoInstall)
 			if(autoInstall) {
 				Loggy.lifecycle("Auto installing lefthook")
-				installTask.runTask()
+				def checkTask = proj.tasks.findByName('check')
+				if(checkTask) {
+					checkTask.dependsOn installTask
+				} else {
+					Loggy.warn("Lefthook auto install requested, but 'check' task not found. Please ensure the 'check' task exists or manually call 'lefthookInstall'.")
+				}
 			}
 			Loggy.debug("config {}", config)
 		}
