@@ -15,7 +15,9 @@ buildscript {
   }
 }
 
-apply plugin: 'com.fizzpod.pater-build'
+//apply plugin: 'com.fizzpod.pater-build'
+apply plugin: 'java-gradle-plugin'
+apply plugin: 'groovy'
 apply plugin: 'com.fizzpod.lefthook'
 apply from: './buildSrc/build.gradle'
 
@@ -76,13 +78,13 @@ lefthook {
   }
 }
 
-gitSemver {
-  stable = false
-}
+//gitSemver {
+//  stable = false
+//}
 
 dependencies {
-  api gradleApi()
-  api localGroovy()  
+  implementation gradleApi()
+  implementation localGroovy()
 }
 
 gradlePlugin {

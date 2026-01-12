@@ -27,14 +27,14 @@ class LefthookPluginHelper {
     })
 
     // New overload for Worker API usage
-    static def createContextForWorker = Loggy.wrap( { File projectDir, Map options, Map config ->
+    static def createContextForWorker = { File projectDir, Map options, Map config ->
         def context = [:]
         context.projectDir = projectDir
         context.extension = options // "extension" alias for options to match legacy structure
         context.options = options
         context.config = config
         return context
-    })
+    }
 
     static def getOptions = Loggy.wrap( {Project project ->
         Loggy.debug("Finding options")

@@ -1,4 +1,3 @@
-assert_lefthook_installed: true
 pre-commit:
   follow: true
   commands:
@@ -7,3 +6,4 @@ commit-msg:
   follow: true
   scripts:
     commit-msg: {runner: bash}
+assert_lefthook_installed: true

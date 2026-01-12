@@ -40,7 +40,7 @@ public abstract class LefthookInstallTask extends DefaultTask {
             description: 'Downloads and installs lefthook'])
     }
 
-    interface LefthookInstallParameters extends WorkParameters {
+    public static interface LefthookInstallParameters extends WorkParameters {
         DirectoryProperty getProjectDir()
         MapProperty<String, Object> getLefthookOptions()
         MapProperty<String, Object> getLefthookConfig()
@@ -53,6 +53,20 @@ public abstract class LefthookInstallTask extends DefaultTask {
         def options = LefthookPluginHelper.getOptions(project)
         def config = LefthookPluginHelper.getConfig(project)
         def projectDir = project.layout.projectDirectory
+
+        // Resolve configuration to ensure all closures are evaluated into serializable objects
+        def resolutionContext = [projectDir: projectDir.asFile, options: options, extension: options]
+        if (config != null) {
+            config = LefthookPluginHelper.resolve(resolutionContext, [], config)
+        }
+
+        // Filter out null values from options and config as MapProperty does not support nulls
+        if (options != null) {
+            options = options.findAll { it.value != null }
+        }
+        if (config != null) {
+            config = config.findAll { it.value != null }
+        }
 
         getWorkerExecutor().noIsolation().submit(LefthookInstallAction.class) { parameters ->
              parameters.getProjectDir().set(projectDir)
@@ -75,8 +89,9 @@ public abstract class LefthookInstallTask extends DefaultTask {
         public void execute() {
             def parameters = getParameters()
             def projectDir = parameters.getProjectDir().get().asFile
-            def options = parameters.getLefthookOptions().get()
-            def config = parameters.getLefthookConfig().get()
+            // Create mutable copies of options and config
+            def options = new HashMap(parameters.getLefthookOptions().get())
+            def config = new HashMap(parameters.getLefthookConfig().get())
 
             def context = LefthookPluginHelper.createContextForWorker(projectDir, options, config)
             LefthookInstallTask.run(context)
