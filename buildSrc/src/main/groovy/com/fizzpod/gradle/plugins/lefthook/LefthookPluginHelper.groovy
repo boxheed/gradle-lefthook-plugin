@@ -16,10 +16,23 @@ class LefthookPluginHelper {
 
     static def createContext = Loggy.wrap( {Project project ->
         def context = [:]
+        // Legacy support - retain project for tasks not yet migrated if needed,
+        // but prefer projectDir.
         context.project = project
+        context.projectDir = project.rootDir
         context.extension = LefthookPluginHelper.getOptions(project)
         context.options = context.extension
         context.config = LefthookPluginHelper.getConfig(project)
+        return context
+    })
+
+    // New overload for Worker API usage
+    static def createContextForWorker = Loggy.wrap( { File projectDir, Map options, Map config ->
+        def context = [:]
+        context.projectDir = projectDir
+        context.extension = options // "extension" alias for options to match legacy structure
+        context.options = options
+        context.config = config
         return context
     })
 
@@ -70,19 +83,19 @@ class LefthookPluginHelper {
         }
     }
 
-    static def resolve = {Project project, List stack, Map source ->
+    static def resolve = {Map context, List stack, Map source ->
         Loggy.debug("resolve {}, {}", stack, source)
         def result = source.inject([:]) { map, key, value ->
             Loggy.debug("inject {}, {}, {}", map, key, value)
             if(key instanceof Closure) {
-                def installer = new LefthookScriptInstaller(project, stack)
+                def installer = new LefthookScriptInstaller(context, stack)
                 key.delegate = installer
                 key.resolveStrategy = Closure.DELEGATE_FIRST
                 key = key.call()
                 Loggy.debug("key closure resolved to {}", key)
             }
             if(value instanceof Closure) {
-                def installer = new LefthookScriptInstaller(project, stack)
+                def installer = new LefthookScriptInstaller(context, stack)
                 value.delegate = installer
                 value.resolveStrategy = Closure.DELEGATE_FIRST
                 value = value.call()
@@ -92,7 +105,7 @@ class LefthookPluginHelper {
             Loggy.debug("Stack {}", localStack)
             if (value instanceof Map) {
                 Loggy.debug("value {} is map, resolving", value)
-                def resolvedValue = LefthookPluginHelper.resolve(project, localStack, value)
+                def resolvedValue = LefthookPluginHelper.resolve(context, localStack, value)
                 Loggy.debug("value {} resolved to {}, assigning to {}", value, resolvedValue, key)
                 map[key] = resolvedValue
                 Loggy.debug("value {} is map, resolving", value)

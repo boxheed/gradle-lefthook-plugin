@@ -7,8 +7,11 @@ import nebula.test.ProjectSpec
 public class LefthookPluginHelperSpec extends ProjectSpec {
 
     def "resolve empty config"() {
+        setup:
+        def context = [project: project, projectDir: project.rootDir]
+
         expect:
-        LefthookPluginHelper.resolve(project, [], config) == result 
+        LefthookPluginHelper.resolve(context, [], config) == result
 
         where:
         config | result

@@ -106,7 +106,7 @@ public class LefthookDownloadTask extends DefaultTask {
     })
 
     static def location = Loggy.wrap({ x ->
-        def projectDir = x.project.rootDir
+        def projectDir = x.projectDir
         def lefthookDir = x.extension.location
         x.location = new File(projectDir, lefthookDir)
         return x.location? x: null

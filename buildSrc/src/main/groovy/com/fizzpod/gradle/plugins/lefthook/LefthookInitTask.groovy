@@ -57,7 +57,7 @@ public class LefthookInitTask extends DefaultTask {
     static def writeRc = Loggy.wrap( { x ->
         def binary = x.binary.getAbsolutePath()
         def rc = new File(x.location, ".lefthookrc")
-        def lefthookLocal = x.project.file('lefthook-local.yml')
+        def lefthookLocal = new File(x.projectDir, 'lefthook-local.yml')
         rc.withWriter { writer ->
             writer.writeLine "export LEFTHOOK_BIN=${binary}"
         }
@@ -67,7 +67,7 @@ public class LefthookInitTask extends DefaultTask {
 
     static def writeLocal = Loggy.wrap( { x ->
         def binary = x.binary.getAbsolutePath()
-        def lefthookLocal = x.project.file('lefthook-local.yml')
+        def lefthookLocal = new File(x.projectDir, 'lefthook-local.yml')
         def rcPath = x.rc.getAbsolutePath()
         lefthookLocal.withWriter { writer ->
             writer.writeLine "rc: ${rcPath}"
@@ -80,7 +80,7 @@ public class LefthookInitTask extends DefaultTask {
         def config = x.config
         
 
-        def lefthookLocal = x.project.file('lefthook.yml')
+        def lefthookLocal = new File(x.projectDir, 'lefthook.yml')
         def rcPath = x.rc.getAbsolutePath()
         lefthookLocal.withWriter { writer ->
             Yaml yaml = new Yaml()
@@ -91,7 +91,7 @@ public class LefthookInitTask extends DefaultTask {
 
     static def resolveConfig = Loggy.wrap( { x ->
         if(x.config != null) {
-            x.config = LefthookPluginHelper.resolve(x.project, [], x.config)
+            x.config = LefthookPluginHelper.resolve(x, [], x.config)
         }
         return x
     })
@@ -99,7 +99,7 @@ public class LefthookInitTask extends DefaultTask {
     static def writeConfig = Loggy.wrap( { x ->
         if(x.config != null) {
             def binary = x.binary.getAbsolutePath()
-            def lefthook = x.project.file('lefthook.yml')
+            def lefthook = new File(x.projectDir, 'lefthook.yml')
             lefthook.withWriter { writer ->
                 Yaml yaml = new Yaml()
                 yaml.dump(x.config, writer)

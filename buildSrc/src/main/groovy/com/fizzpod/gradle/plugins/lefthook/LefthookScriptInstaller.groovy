@@ -7,11 +7,11 @@ import org.gradle.api.Project
 
 public class LefthookScriptInstaller {
 
-    private Project project
+    private Map context
     private List<String> stack
 
-    public LefthookScriptInstaller(Project project, List<String> stack) {
-        this.project = project
+    public LefthookScriptInstaller(Map context, List<String> stack) {
+        this.context = context
         this.stack = stack
     }
 
@@ -20,10 +20,16 @@ public class LefthookScriptInstaller {
         if(resource instanceof Closure) {
             res = resource.call()
         }
-        def context = LefthookPluginHelper.createContext(this.project)
-        context.resource = res
-        context.stack = this.stack
-        return LefthookScriptInstaller.doInstall(context)
+        // Use existing context, possibly copy/augment it?
+        // We need to pass a context that has 'resource' and 'stack' to doInstall.
+        // We should avoid mutating the shared context if possible, or use a new map.
+
+        // Create a new context map inheriting from the passed context
+        def installContext = new HashMap(this.context)
+        installContext.resource = res
+        installContext.stack = this.stack
+
+        return LefthookScriptInstaller.doInstall(installContext)
     } 
 
     static def guid = { ->
@@ -43,7 +49,7 @@ public class LefthookScriptInstaller {
             .map(x -> LefthookScriptInstaller.download(x))
             //.map(x -> LefthookScriptInstaller.setExecute(x))
             .map(x -> LefthookScriptInstaller.createConfig(x))
-            .orElseThrow(() -> new RuntimeException("Unable to install " + resource))
+            .orElseThrow(() -> new RuntimeException("Unable to install " + context.resource))
         return config
     })
 

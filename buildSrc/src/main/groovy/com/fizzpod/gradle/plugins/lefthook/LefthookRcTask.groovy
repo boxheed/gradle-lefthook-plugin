@@ -59,7 +59,7 @@ public class LefthookRcTask extends DefaultTask {
 
     static def writeLocal = Loggy.wrap( { x ->
         def binary = x.binary.getAbsolutePath()
-        def lefthookLocal = x.project.file('lefthook-local.yml')
+        def lefthookLocal = new File(x.projectDir, 'lefthook-local.yml')
         def rcPath = x.rc.getAbsolutePath()
         lefthookLocal.withWriter { writer ->
             writer.writeLine "rc: ${rcPath}"

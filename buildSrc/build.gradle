@@ -1,3 +1,4 @@
+apply plugin: 'groovy'
 repositories {
 	mavenCentral()
 }
@@ -17,6 +18,7 @@ dependencies {
 
   test {
     useJUnitPlatform()
+    jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED'
     testLogging {
         events "passed", "skipped", "failed"
     }
