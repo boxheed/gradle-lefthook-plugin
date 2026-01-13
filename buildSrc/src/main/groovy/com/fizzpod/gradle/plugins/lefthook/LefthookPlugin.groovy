@@ -12,7 +12,7 @@ public class LefthookPlugin implements Plugin<Project> {
 	public static final String EXE_NAME = "lefthook"
 
 	void apply(Project project) {
-		createExtension(project)
+		def extension = createExtension(project)
 		def downloadTask = LefthookDownloadTask.register(project)
 		def downloadAllTask = LefthookDownloadAllTask.register(project)
 		def versionTask = LefthookVersionTask.register(project)
@@ -23,25 +23,23 @@ public class LefthookPlugin implements Plugin<Project> {
 		def installTask = LefthookInstallTask.register(project)
 
 		project.afterEvaluate { proj -> 
-			def options = LefthookPluginHelper.getOptions(proj)
-			def config = LefthookPluginHelper.getConfig(proj)
-			def autoInstall = options.autoInstall
-			Loggy.debug("Lefthook Options: {}", options)
+			def autoInstall = extension.getAutoInstall().get();
+			def autoTaskName = extension.getAutoTaskName().get()
 			Loggy.debug("Auto installing lefthook: {}", autoInstall)
 			if(autoInstall) {
 				Loggy.lifecycle("Auto installing lefthook")
-				def checkTask = proj.tasks.findByName('check')
+				def checkTask = proj.tasks.findByName(autoTaskName)
 				if(checkTask) {
 					checkTask.dependsOn installTask
 				} else {
-					Loggy.warn("Lefthook auto install requested, but 'check' task not found. Please ensure the 'check' task exists or manually call 'lefthookInstall'.")
+					Loggy.warn("Lefthook auto install requested, but '${autoTaskName}' task not found. Please ensure the 'check' task exists or manually call 'lefthookInstall'.")
 				}
 			}
 			Loggy.debug("config {}", config)
 		}
 	}
 
-	private void createExtension(project) {
-		project.extensions.create(NAME, LefthookPluginExtension)
+	private LefthookPluginExtension createExtension(project) {
+		return project.extensions.create(NAME, LefthookPluginExtension)
     }
 }
