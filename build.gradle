@@ -49,6 +49,7 @@ sourceSets {
 
 lefthook {
   version = "latest"
+  rc = "export FOO=bar"
   autoInstall = false
   config =
     [
@@ -93,4 +94,10 @@ gradlePlugin {
       implementationClass = 'com.fizzpod.gradle.plugins.lefthook.LefthookPlugin'
     }
   }
+}
+
+develocity {
+    buildScan {
+        publishing.onlyIf { false }
+    }
 }

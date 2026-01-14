@@ -78,11 +78,15 @@ public abstract class LefthookDownloadTask extends DefaultTask {
     }
 
     static def download = Loggy.wrap({ x ->
-        def repo = x.repository
+        def repo = x.repository ?: x.extension?.getRepository()?.get()
         def arch = x.arch ?: OS.getArch(null)
         def os = x.os ?: OS.getOs(null)
-        def version = x.version
-        def location = x.location
+        def version = x.version ?: x.extension?.getVersion()?.get()
+        def location = x.location ?: x.extension?.getLocation()?.getAsFile()?.get()
+
+        x.repository = repo
+        x.version = version
+        x.location = location
 
         x.binary = LefthookInstallation.install(repo, arch, os, version, location)
 

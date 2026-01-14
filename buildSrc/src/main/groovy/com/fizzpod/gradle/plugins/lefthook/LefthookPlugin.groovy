@@ -21,6 +21,19 @@ public class LefthookPlugin implements Plugin<Project> {
 		def initTask = LefthookInitTask.register(project)
 		def localTask = LefthookLocalTask.register(project)
 		def installTask = LefthookInstallTask.register(project)
+        
+        rcTask.configure { task ->
+            task.getLefthookBinary().set(downloadTask.getLefthookLocation().map { directory ->
+                def dirFile = directory.getAsFile()
+                def os = OS.getOs(null)
+                def arch = OS.getArch(null)
+                def binary = LefthookInstallation.findBinary(dirFile, os, arch)
+                if(binary == null) {
+                    throw new RuntimeException("Lefthook binary not found in " + dirFile)
+                }
+                return directory.file(binary.name)
+            })
+        }
 
 		project.afterEvaluate { proj -> 
 			def autoInstall = extension.getAutoInstall().get();

@@ -35,6 +35,21 @@ public class LefthookInstallation {
         return result
     }
 
+    static def findBinary(File location, OS.Family os, OS.Arch arch) {
+        def binaryPattern = LefthookInstallation.getBinaryName("v?(\\d+\\.\\d+\\.\\d+)", os, arch) + ".*"
+        def binary = null
+        if(location.exists()) {
+            location.listFiles().each { File file ->
+                if (file.name =~ binaryPattern) {
+                    if(binary == null || binary.lastModified() < file.lastModified()) {
+                        binary = file
+                    }
+                }
+            }
+        }
+        return binary
+    }
+
     static def download = Loggy.wrap({ x ->
         if(!x.binary.exists()) {
             LefthookInstallation.downloadAndInstall(x.url, x.binary, x.os)

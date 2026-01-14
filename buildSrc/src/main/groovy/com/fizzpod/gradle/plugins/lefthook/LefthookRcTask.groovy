@@ -5,17 +5,32 @@ package com.fizzpod.gradle.plugins.lefthook
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.Internal
 
-public class LefthookRcTask extends DefaultTask {
+public abstract class LefthookRcTask extends DefaultTask {
 
     public static final String NAME = "lefthookRc"
 
-    private Project project
+    @InputFile
+    abstract RegularFileProperty getLefthookBinary()
+
+    @Input
+    abstract Property<String> getRcConfiguration()
+
+    @OutputFile
+    abstract RegularFileProperty getLefthookRcFile()
 
     @Inject
     public LefthookRcTask(Project project) {
-        this.project = project
+        def extension = project.extensions.getByType(LefthookPluginExtension)
+        getRcConfiguration().convention(extension.getRc())
+        getLefthookRcFile().convention(extension.getLocation().file(".lefthookrc"))
     }
 
     static register(Project project) {
@@ -24,22 +39,28 @@ public class LefthookRcTask extends DefaultTask {
 
         return taskContainer.create([name: NAME,
             type: LefthookRcTask,
-            dependsOn: [],
+            dependsOn: [LefthookDownloadTask.NAME],
             group: LefthookPlugin.GROUP,
             description: 'Creates the lefthookrc file'])
     }
 
     @TaskAction
     def runTask() {
-        def context = LefthookPluginHelper.createContext(project)
-        LefthookRcTask.run(context)
+        def binary = getLefthookBinary().getAsFile().get()
+        def rcFile = getLefthookRcFile().getAsFile().get()
+        def rcConfig = getRcConfiguration().get()
+        
+        rcFile.withWriter { writer ->
+            writer.writeLine "export LEFTHOOK_BIN=${binary.getAbsolutePath()}"
+            writer.writeLine rcConfig
+        }
     }
-
+    
+    // Kept for backward compatibility
     static def run = { context ->
         def status = Optional.ofNullable(context)
             .map(x -> LefthookDownloadTask.run(x))
             .map(x -> LefthookRcTask.writeRc(x))
-            //TODO should this run
             .map(x -> LefthookRcTask.command(x))
             .map(x -> Command.execute(x))
             .orElseThrow(() -> new RuntimeException("Unable to run lefthook"))
@@ -51,7 +72,12 @@ public class LefthookRcTask extends DefaultTask {
         def rc = new File(x.location, ".lefthookrc")
         rc.withWriter { writer ->
             writer.writeLine "export LEFTHOOK_BIN=${binary}"
-            writer.writeLine x.extension.rc.call()
+            def rcContent = ""
+            try {
+                rcContent = x.extension.getRc().get()
+            } catch (Exception e) {
+            }
+            writer.writeLine rcContent
         }
         x.rc = rc
         return x
@@ -80,6 +106,5 @@ public class LefthookRcTask extends DefaultTask {
         x.command = commandParts.join(" ")
         return x
     } )
-        
 
 }

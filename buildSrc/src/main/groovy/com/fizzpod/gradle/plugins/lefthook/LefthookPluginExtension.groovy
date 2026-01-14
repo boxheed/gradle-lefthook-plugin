@@ -37,6 +37,7 @@ public abstract class LefthookPluginExtension implements GroovyInterceptable {
     abstract Property<String> getVersion()
     abstract DirectoryProperty getLocation()
     abstract Property<String> getRepository()
+    abstract Property<String> getRc()
 
     @Inject
     public LefthookPluginExtension(ObjectFactory objects) {
@@ -47,5 +48,6 @@ public abstract class LefthookPluginExtension implements GroovyInterceptable {
         getVersion().convention("latest")
         getLocation().convention(project.layout.projectDirectory.dir(".lefthook"))
         getRepository().convention("evilmartians/lefthook")
+        getRc().convention("")
     }
 }
