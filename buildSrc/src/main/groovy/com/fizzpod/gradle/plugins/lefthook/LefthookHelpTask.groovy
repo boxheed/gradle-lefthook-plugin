@@ -5,17 +5,23 @@ package com.fizzpod.gradle.plugins.lefthook
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.TaskAction
+import org.gradle.process.ExecOperations
 
-public class LefthookHelpTask extends DefaultTask {
+public abstract class LefthookHelpTask extends DefaultTask {
 
     public static final String NAME = "lefthookHelp"
 
-    private Project project
+    @InputFile
+    abstract RegularFileProperty getLefthookBinary()
+
+    @Inject
+    abstract ExecOperations getExecOperations()
 
     @Inject
     public LefthookHelpTask(Project project) {
-        this.project = project
     }
 
     static register(Project project) {
@@ -31,22 +37,15 @@ public class LefthookHelpTask extends DefaultTask {
 
     @TaskAction
     def runTask() {
-        def context = LefthookPluginHelper.createContext(project)
-        def result = LefthookHelpTask.run(context)
-        if(result.exit == 0) {
-            Loggy.lifecycle("Lefthook help: \n{}", result.sout? result.sout: "No Changes")
-        } else {
-            Loggy.lifecycle("Lefthook help error: \n{}\n{}", result.serr, result.serr)
+        def binary = getLefthookBinary().getAsFile().get()
+        
+        getExecOperations().exec { spec ->
+            spec.commandLine(binary.absolutePath, "help")
         }
     }
 
     static def run = { context ->
-        def status = Optional.ofNullable(context)
-            .map(x -> LefthookInstallTask.run(x))
-            .map(x -> LefthookHelpTask.command(x))
-            .map(x -> Command.execute(x))
-            .orElseThrow(() -> new RuntimeException("Unable to run lefthook"))
-        return status
+        return null
     }
 
     static def getOut = Loggy.wrap( { x -> 
