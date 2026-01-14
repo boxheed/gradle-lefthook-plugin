@@ -38,6 +38,10 @@ public class LefthookPlugin implements Plugin<Project> {
         localTask.configure { task ->
             task.getLefthookRcFile().set(rcTask.getLefthookRcFile())
         }
+        
+        initTask.configure { task ->
+            task.getConfig().set(extension.getConfig())
+        }
 
 		project.afterEvaluate { proj -> 
 			def autoInstall = extension.getAutoInstall().get();

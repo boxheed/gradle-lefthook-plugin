@@ -93,4 +93,9 @@ public abstract class LefthookDownloadTask extends DefaultTask {
         return x.binary? x: null
     })
 
+    static def location = Loggy.wrap({ x ->
+        x.location = x.extension.getLocation().get().getAsFile()
+        return x.location? x: null
+    })
+
 }

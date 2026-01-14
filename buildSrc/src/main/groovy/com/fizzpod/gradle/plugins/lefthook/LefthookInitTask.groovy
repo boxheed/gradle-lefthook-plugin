@@ -5,18 +5,39 @@ package com.fizzpod.gradle.plugins.lefthook
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.provider.MapProperty
+import org.gradle.api.provider.Provider
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.yaml.snakeyaml.Yaml
 
-public class LefthookInitTask extends DefaultTask {
+public abstract class LefthookInitTask extends DefaultTask {
 
     public static final String NAME = "lefthookInit"
 
-    private Project project
+    @Internal
+    abstract MapProperty<String, Object> getConfig()
+
+    @Input
+    Provider<String> getResolvedConfigContent() {
+        return getConfig().map { config -> 
+             // Resolve the configuration (handle closures etc.)
+             def resolved = LefthookPluginHelper.resolve(project, [], config)
+             Yaml yaml = new Yaml()
+             return yaml.dump(resolved)
+        }
+    }
+
+    @OutputFile
+    abstract RegularFileProperty getLefthookConfigFile()
 
     @Inject
     public LefthookInitTask(Project project) {
-        this.project = project
+        getConfig().convention([:])
+        getLefthookConfigFile().convention(project.layout.projectDirectory.file("lefthook.yml"))
     }
 
     static register(Project project) {
@@ -27,20 +48,22 @@ public class LefthookInitTask extends DefaultTask {
             type: LefthookInitTask,
             dependsOn: [],
             group: LefthookPlugin.GROUP,
-            description: 'Installs/creates the lefthook.yml file'])
+            description: 'Creates the lefthook.yml file'])
     }
 
     @TaskAction
     def runTask() {
-        def context = LefthookPluginHelper.createContext(project)
-        def result = LefthookInitTask.run(context)
-        if(result.exit == 0) {
-            Loggy.lifecycle("Lefthook init: \n{}", result.sout? result.sout: "No Changes")
-        } else {
-            Loggy.lifecycle("Lefthook init error: \n{}\n{}", result.serr, result.serr)
+        def content = getResolvedConfigContent().get()
+        def configFile = getLefthookConfigFile().getAsFile().get()
+        
+        if (content != null && !content.isEmpty()) {
+            configFile.withWriter { writer ->
+                writer.write(content)
+            }
         }
     }
 
+    // Kept for backward compatibility
     static def run = { context ->
         def status = Optional.ofNullable(context)
             .map(x -> LefthookDownloadTask.run(x))
@@ -53,11 +76,11 @@ public class LefthookInitTask extends DefaultTask {
             .orElseThrow(() -> new RuntimeException("Unable to run lefthook"))
         return status
     }
-
+    
+    // Legacy static methods kept for compatibility
     static def writeRc = Loggy.wrap( { x ->
         def binary = x.binary.getAbsolutePath()
         def rc = new File(x.location, ".lefthookrc")
-        def lefthookLocal = x.project.file('lefthook-local.yml')
         rc.withWriter { writer ->
             writer.writeLine "export LEFTHOOK_BIN=${binary}"
         }
@@ -78,8 +101,6 @@ public class LefthookInitTask extends DefaultTask {
     static def runConfigInstallers = Loggy.wrap( { x ->
         def binary = x.binary.getAbsolutePath()
         def config = x.config
-        
-
         def lefthookLocal = x.project.file('lefthook.yml')
         def rcPath = x.rc.getAbsolutePath()
         lefthookLocal.withWriter { writer ->
@@ -121,6 +142,5 @@ public class LefthookInitTask extends DefaultTask {
         x.command = commandParts.join(" ")
         return x
     } )
-        
 
 }
