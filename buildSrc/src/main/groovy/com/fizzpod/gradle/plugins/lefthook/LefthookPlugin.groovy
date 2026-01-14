@@ -35,7 +35,7 @@ public class LefthookPlugin implements Plugin<Project> {
 					Loggy.warn("Lefthook auto install requested, but '${autoTaskName}' task not found. Please ensure the 'check' task exists or manually call 'lefthookInstall'.")
 				}
 			}
-			Loggy.debug("config {}", config)
+			//Loggy.debug("config {}", config)
 		}
 	}
 

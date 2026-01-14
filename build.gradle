@@ -49,8 +49,8 @@ sourceSets {
 
 lefthook {
   version = "latest"
-  autoInstall = true
-  config {
+  autoInstall = false
+  config =
     [
       "assert_lefthook_installed": true,
       "pre-commit": [
@@ -71,7 +71,7 @@ lefthook {
         ]
       ]
     ]
-  }
+  
 }
 
 gitSemver {

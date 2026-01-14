@@ -15,9 +15,7 @@ import org.rauschig.jarchivelib.CompressionType
 
 public class LefthookInstallation {
 
-    public static final String LEFTHOOK_INSTALL_DIR = ".lefthook"
-
-    static def install = { String repo, String arch, String os, String version, File location ->
+    static def install = { String repo, OS.Arch arch, OS.Family os, String version, File location ->
         def params = [
             arch: arch,
             os: os,
@@ -86,12 +84,14 @@ public class LefthookInstallation {
     }.memoize()
 
     static def os = Loggy.wrap({def x ->
-        x.os = OS.getOs(x.params.os)
+        //x.os = OS.getOs(x.params.os)
+        x.os = x.params.os
         x.os? x: null
     }.memoize())
 
     static def arch = Loggy.wrap({def x ->
-        x.arch = OS.getArch(x.params.arch)
+        //x.arch = OS.getArch(x.params.arch)
+        x.arch = x.params.arch
         x.arch? x: null
     }.memoize())
 
