@@ -72,11 +72,7 @@ public abstract class LefthookRcTask extends DefaultTask {
         def rc = new File(x.location, ".lefthookrc")
         rc.withWriter { writer ->
             writer.writeLine "export LEFTHOOK_BIN=${binary}"
-            def rcContent = ""
-            try {
-                rcContent = x.extension.getRc().get()
-            } catch (Exception e) {
-            }
+            def rcContent = x.extension.getRc().get()
             writer.writeLine rcContent
         }
         x.rc = rc
