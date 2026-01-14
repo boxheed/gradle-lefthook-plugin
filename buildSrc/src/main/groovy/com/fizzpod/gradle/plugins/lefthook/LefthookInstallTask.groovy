@@ -5,19 +5,43 @@ package com.fizzpod.gradle.plugins.lefthook
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.gradle.process.ExecOperations
 
-public class LefthookInstallTask extends DefaultTask {
+public abstract class LefthookInstallTask extends DefaultTask {
 
     public static final String NAME = "lefthookInstall"
 
-    public static final String GITSEMVER_INSTALL_DIR = ".lefthook"
+    @InputFile
+    abstract RegularFileProperty getLefthookBinary()
 
-    private Project project
+    @InputFile
+    abstract RegularFileProperty getLefthookConfigFile()
+
+    @InputFile
+    abstract RegularFileProperty getLefthookLocalFile()
+    
+    @InputFile
+    abstract RegularFileProperty getLefthookRcFile()
+
+    @OutputDirectory
+    abstract DirectoryProperty getGitHooksDir()
+
+    @OutputFile
+    abstract RegularFileProperty getLefthookChecksumFile()
+    
+    @Inject
+    abstract ExecOperations getExecOperations()
 
     @Inject
     public LefthookInstallTask(Project project) {
-        this.project = project
+        getGitHooksDir().convention(project.layout.projectDirectory.dir(".git/hooks"))
+        getLefthookChecksumFile().convention(project.layout.projectDirectory.file("lefthook.checksum"))
     }
 
     static register(Project project) {
@@ -28,15 +52,21 @@ public class LefthookInstallTask extends DefaultTask {
             type: LefthookInstallTask,
             dependsOn: [],
             group: LefthookPlugin.GROUP,
-            description: 'Downloads and installs lefthook'])
+            description: 'Installs lefthook hooks'])
     }
 
     @TaskAction
     def runTask() {
-        def context = LefthookPluginHelper.createContext(project)
-        LefthookInstallTask.run(context)
+        def binary = getLefthookBinary().getAsFile().get()
+        
+        // Execute lefthook install
+        getExecOperations().exec { spec ->
+            spec.commandLine(binary.absolutePath, "install", "-f")
+            spec.workingDir = project.projectDir
+        }
     }
-
+    
+    // Kept for backward compatibility
     static def run = Loggy.wrap({ context ->
         return Optional.ofNullable(context)
             .map(x -> LefthookDownloadTask.run(x))
