@@ -5,17 +5,25 @@ package com.fizzpod.gradle.plugins.lefthook
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
-public class LefthookLocalTask extends DefaultTask {
+public abstract class LefthookLocalTask extends DefaultTask {
 
     public static final String NAME = "lefthookLocal"
 
-    private Project project
+    @InputFile
+    abstract RegularFileProperty getLefthookRcFile()
+
+    @OutputFile
+    abstract RegularFileProperty getLefthookLocalFile()
 
     @Inject
     public LefthookLocalTask(Project project) {
-        this.project = project
+        // Convention for output file is project root/lefthook-local.yml
+        getLefthookLocalFile().convention(project.layout.projectDirectory.file("lefthook-local.yml"))
     }
 
     static register(Project project) {
@@ -26,15 +34,20 @@ public class LefthookLocalTask extends DefaultTask {
             type: LefthookLocalTask,
             dependsOn: [],
             group: LefthookPlugin.GROUP,
-            description: 'Creates the lefthookrc file'])
+            description: 'Creates the lefthook-local.yml file'])
     }
 
     @TaskAction
     def runTask() {
-        def context = LefthookPluginHelper.createContext(project)
-        LefthookLocalTask.run(context)
+        def rcFile = getLefthookRcFile().getAsFile().get()
+        def localFile = getLefthookLocalFile().getAsFile().get()
+        
+        localFile.withWriter { writer ->
+            writer.writeLine "rc: ${rcFile.absolutePath}"
+        }
     }
 
+    // Kept for backward compatibility if called statically, though likely broken now without context
     static def run = { context ->
         def status = Optional.ofNullable(context)
             .map(x -> LefthookRcTask.run(x))
@@ -44,7 +57,6 @@ public class LefthookLocalTask extends DefaultTask {
     }
 
     static def writeLocal = Loggy.wrap( { x ->
-        def binary = x.binary.getAbsolutePath()
         def lefthookLocal = x.project.file('lefthook-local.yml')
         def rcPath = x.rc.getAbsolutePath()
         lefthookLocal.withWriter { writer ->
@@ -52,8 +64,4 @@ public class LefthookLocalTask extends DefaultTask {
         }
         return x
     })
-
-
-        
-
 }
