@@ -16,6 +16,7 @@ buildscript {
 }
 
 //apply plugin: 'com.fizzpod.pater-build'
+//apply plugin: 'com.fizzpod.osv-scanner'
 //apply plugin: 'com.fizzpod.lefthook'
 apply from: './buildSrc/build.gradle'
 
