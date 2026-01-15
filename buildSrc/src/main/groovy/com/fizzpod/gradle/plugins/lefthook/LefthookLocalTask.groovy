@@ -46,22 +46,4 @@ public abstract class LefthookLocalTask extends DefaultTask {
             writer.writeLine "rc: ${rcFile.absolutePath}"
         }
     }
-
-    // Kept for backward compatibility if called statically, though likely broken now without context
-    static def run = { context ->
-        def status = Optional.ofNullable(context)
-            .map(x -> LefthookRcTask.run(x))
-            .map(x -> LefthookLocalTask.writeLocal(x))
-            .orElseThrow(() -> new RuntimeException("Unable to run lefthook"))
-        return status
-    }
-
-    static def writeLocal = Loggy.wrap( { x ->
-        def lefthookLocal = x.project.file('lefthook-local.yml')
-        def rcPath = x.rc.getAbsolutePath()
-        lefthookLocal.withWriter { writer ->
-            writer.writeLine "rc: ${rcPath}"
-        }
-        return x
-    })
 }

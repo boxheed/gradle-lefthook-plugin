@@ -23,7 +23,7 @@ public class LefthookPlugin implements Plugin<Project> {
 		def installTask = LefthookInstallTask.register(project)
         
         rcTask.configure { task ->
-            task.getLefthookBinary().set(downloadTask.getLefthookLocation().map { directory ->
+            task.getLefthookBinary().set(extension.getLocation().map { directory ->
                 def dirFile = directory.getAsFile()
                 def os = OS.getOs(null)
                 def arch = OS.getArch(null)

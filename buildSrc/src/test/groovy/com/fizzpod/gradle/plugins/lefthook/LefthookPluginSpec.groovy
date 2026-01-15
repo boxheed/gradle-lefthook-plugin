@@ -60,8 +60,8 @@ class LefthookPluginSpec extends Specification {
    
     def "run lefthookHelpTask"() {
         setup:
-        
             Project project = ProjectBuilder.builder().withProjectDir(temporaryFolder.getRoot()).build()
+            setupBinary(project)
         when:
             def plugin = new LefthookPlugin()
             plugin.apply(project)
@@ -99,8 +99,8 @@ class LefthookPluginSpec extends Specification {
 
     def "run lefthookRcTask"() {
         setup:
-        
             Project project = ProjectBuilder.builder().withProjectDir(temporaryFolder.getRoot()).build()
+            setupBinary(project)
         when:
             def plugin = new LefthookPlugin()
             plugin.apply(project)
@@ -110,7 +110,18 @@ class LefthookPluginSpec extends Specification {
             !project.getTasksByName(LefthookRcTask.NAME, false).isEmpty()
     }
 
-    
-    
+    def setupBinary(Project project) {
+        def os = OS.getOs(null)
+        def arch = OS.getArch(null)
+        def version = "1.0.0"
+        def name = LefthookInstallation.getBinaryName(version, os, arch)
+
+        def lefthookDir = project.file(".lefthook")
+        lefthookDir.mkdirs()
+        def binary = new File(lefthookDir, name)
+        binary.text = "#!/bin/sh\necho 'lefthook help'"
+        binary.setExecutable(true)
+        return binary
+    }
     
 }

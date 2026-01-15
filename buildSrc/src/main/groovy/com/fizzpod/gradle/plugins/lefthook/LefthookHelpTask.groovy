@@ -44,22 +44,4 @@ public abstract class LefthookHelpTask extends DefaultTask {
         }
     }
 
-    static def run = { context ->
-        return null
-    }
-
-    static def getOut = Loggy.wrap( { x -> 
-            def out = x.sout? x.sout.trim(): ""
-            return out
-        })
-
-    static def command = Loggy.wrap( { x ->
-        def commandParts = []
-        commandParts.add(x.binary.getAbsolutePath())
-        commandParts.add("help")
-        x.command = commandParts.join(" ")
-        return x
-    } )
-        
-
 }

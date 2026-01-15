@@ -12,10 +12,11 @@ import org.gradle.api.tasks.TaskAction
 import org.rauschig.jarchivelib.ArchiveFormat
 import org.rauschig.jarchivelib.ArchiverFactory
 import org.rauschig.jarchivelib.CompressionType
+import groovy.transform.Memoized
 
 public class LefthookInstallation {
 
-    static def install = { String repo, OS.Arch arch, OS.Family os, String version, File location ->
+    static File install(String repo, OS.Arch arch, OS.Family os, String version, File location) {
         def params = [
             arch: arch,
             os: os,
@@ -35,7 +36,7 @@ public class LefthookInstallation {
         return result
     }
 
-    static def findBinary(File location, OS.Family os, OS.Arch arch) {
+    static File findBinary(File location, OS.Family os, OS.Arch arch) {
         def binaryPattern = LefthookInstallation.getBinaryName("v?(\\d+\\.\\d+\\.\\d+)", os, arch) + ".*"
         def binary = null
         if(location.exists()) {
@@ -50,64 +51,86 @@ public class LefthookInstallation {
         return binary
     }
 
-    static def download = Loggy.wrap({ x ->
-        if(!x.binary.exists()) {
-            LefthookInstallation.downloadAndInstall(x.url, x.binary, x.os)
-        } else {
-            FileUtils.touch(x.binary)
+    static Map download(Map x) {
+        Loggy.debug("{} Entry : {}", "LefthookInstallation", x)
+        try {
+            if(!x.binary.exists()) {
+                LefthookInstallation.downloadAndInstall(x.url, x.binary, x.os)
+            } else {
+                FileUtils.touch(x.binary)
+            }
+            def result = x.binary.exists()? x: null
+            Loggy.debug("{} Exit : {}", "LefthookInstallation", result != null? result: "null")
+            return result
+        } catch (Exception e) {
+            throw e
         }
-        return x.binary.exists()? x: null
-    })
+    }
 
-    static def downloadAndInstall = { url, binary , os ->
+    static File downloadAndInstall(String url, File binary, OS.Family os) {
         def tmp = new File(binary.getParentFile(), binary.getName())
         FileUtils.copyURLToFile(new URL(url), tmp, 120000, 120000)
         binary.setExecutable(true)
         return binary
     }
 
-    static def bin = Loggy.wrap({ x ->
+    static Map bin(Map x) {
+        Loggy.debug("{} Entry : {}", "LefthookInstallation", x)
         def location = x.params.location
         def version = x.version
         def os = x.os
         def arch = x.arch
         x.binary = LefthookInstallation.binary(location, version, os, arch)
-        x.binary? x: null
-    })
+        def result = x.binary? x: null
+        Loggy.debug("{} Exit : {}", "LefthookInstallation", result != null? result: "null")
+        return result
+    }
 
-    static def binary = {location, version, os, arch ->
+    @Memoized
+    static File binary(File location, String version, OS.Family os, OS.Arch arch) {
         def name = LefthookInstallation.getBinaryName(version, os, arch)
         return new File(location, name)
-    }.memoize()
+    }
 
-
-    static def getBinaryName = {version, os, arch ->
+    @Memoized
+    static String getBinaryName(String version, OS.Family os, OS.Arch arch) {
         def osId = os.id
         def archId = arch.id
         def extension = os == OS.Family.WINDOWS? ".exe": ""
         def name = "lefthook_${version}_${osId}_${archId}${extension}"
         return name
-    }.memoize()
+    }
 
-    static def artifact = Loggy.wrap({ x ->
+    static Map artifact(Map x) {
+        Loggy.debug("{} Entry : {}", "LefthookInstallation", x)
         x = x + LefthookInstallation.resolveArtifact(x.params.repo, x.arch, x.os, x.params.version)
-    })
+        Loggy.debug("{} Exit : {}", "LefthookInstallation", x != null? x: "null")
+        return x
+    }
 
-    static def resolveArtifact = { String repo, OS.Arch arch, OS.Family os, String version ->
+    @Memoized
+    static Map resolveArtifact(String repo, OS.Arch arch, OS.Family os, String version) {
         def artifact = GitHubClient.resolve(repo, arch, os, version)
         return [url: artifact.url, version: artifact.version]
-    }.memoize()
+    }
 
-    static def os = Loggy.wrap({def x ->
-        //x.os = OS.getOs(x.params.os)
+    // Memoize applied to the method
+    @Memoized
+    static Map os(Map x) {
+        Loggy.debug("{} Entry : {}", "LefthookInstallation", x)
         x.os = x.params.os
-        x.os? x: null
-    }.memoize())
+        def result = x.os? x: null
+        Loggy.debug("{} Exit : {}", "LefthookInstallation", result != null? result: "null")
+        return result
+    }
 
-    static def arch = Loggy.wrap({def x ->
-        //x.arch = OS.getArch(x.params.arch)
+    @Memoized
+    static Map arch(Map x) {
+        Loggy.debug("{} Entry : {}", "LefthookInstallation", x)
         x.arch = x.params.arch
-        x.arch? x: null
-    }.memoize())
+        def result = x.arch? x: null
+        Loggy.debug("{} Exit : {}", "LefthookInstallation", result != null? result: "null")
+        return result
+    }
 
 }

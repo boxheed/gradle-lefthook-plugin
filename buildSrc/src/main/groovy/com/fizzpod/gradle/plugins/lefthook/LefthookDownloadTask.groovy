@@ -59,25 +59,29 @@ public abstract class LefthookDownloadTask extends DefaultTask {
         context.repository = getLefthookRepository().get()
         context.location = getLefthookLocation().getAsFile().get()
         
-        LefthookDownloadTask.run(context)
+        run(context)
         getLefthookBinary().set(context.binary)
     }
 
-    static def run = Loggy.wrap({ context ->
-        return Optional.ofNullable(context)
-            .map(x -> LefthookDownloadTask.ttl(x))
-            .map(x -> LefthookDownloadTask.download(x))
+    private static Map run(Map context) {
+        Loggy.debug("{} Entry : {}", "LefthookDownloadTask", context)
+        def result = Optional.ofNullable(context)
+            .map(x -> ttl(x))
+            .map(x -> download(x))
             .orElseThrow(() -> new RuntimeException("Unable to install lefthook"))
-    })
+        Loggy.debug("{} Exit : {}", "LefthookDownloadTask", result != null? result: "null")
+        return result
+    }
 
     /**
     * Find the most recent binary and see if it is within ttl
     */
-    static def ttl = { x ->
+    private static Map ttl(Map x) {
         return x
     }
 
-    static def download = Loggy.wrap({ x ->
+    private static Map download(Map x) {
+        Loggy.debug("{} Entry : {}", "LefthookDownloadTask", x)
         def repo = x.repository ?: x.extension?.getRepository()?.get()
         def arch = x.arch ?: OS.getArch(null)
         def os = x.os ?: OS.getOs(null)
@@ -90,12 +94,9 @@ public abstract class LefthookDownloadTask extends DefaultTask {
 
         x.binary = LefthookInstallation.install(repo, arch, os, version, location)
 
-        return x.binary? x: null
-    })
-
-    static def location = Loggy.wrap({ x ->
-        x.location = x.extension.getLocation().get().getAsFile()
-        return x.location? x: null
-    })
+        def result = x.binary? x: null
+        Loggy.debug("{} Exit : {}", "LefthookDownloadTask", result != null? result: "null")
+        return result
+    }
 
 }
