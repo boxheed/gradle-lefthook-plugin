@@ -25,9 +25,7 @@ public class LefthookPlugin implements Plugin<Project> {
         rcTask.configure { task ->
             task.getLefthookBinary().set(downloadTask.getLefthookLocation().map { directory ->
                 def dirFile = directory.getAsFile()
-                def os = OS.getOs(null)
-                def arch = OS.getArch(null)
-                def binary = LefthookInstallation.findBinary(dirFile, os, arch)
+                def binary = LefthookInstallation.findBinary(dirFile)
                 if(binary == null) {
                     throw new RuntimeException("Lefthook binary not found in " + dirFile)
                 }
@@ -52,10 +50,6 @@ public class LefthookPlugin implements Plugin<Project> {
         
         versionTask.configure { task ->
             task.getLefthookBinary().set(rcTask.getLefthookBinary())
-        }
-
-        helpTask.configure { task ->
-            task.getLefthookBinary().set(downloadTask.getLefthookBinary())
         }
 
 		project.afterEvaluate { proj -> 

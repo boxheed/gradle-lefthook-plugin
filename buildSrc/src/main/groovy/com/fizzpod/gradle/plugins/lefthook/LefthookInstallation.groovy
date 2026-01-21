@@ -35,6 +35,12 @@ public class LefthookInstallation {
         return result
     }
 
+    static def findBinary(File location) {
+        def os = OS.getOs(null)
+        def arch = OS.getArch(null)
+        return findBinary(location, os, arch)
+    }
+
     static def findBinary(File location, OS.Family os, OS.Arch arch) {
         def binaryPattern = LefthookInstallation.getBinaryName("v?(\\d+\\.\\d+\\.\\d+)", os, arch) + ".*"
         def binary = null
