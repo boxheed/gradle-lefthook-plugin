@@ -1,14 +1,14 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
 import javax.inject.Inject
 import org.gradle.api.Project
-import org.gradle.api.provider.Property
-import org.gradle.api.provider.MapProperty
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.MapProperty
+import org.gradle.api.provider.Property
 
 public abstract class LefthookPluginExtension implements GroovyInterceptable {
     /*

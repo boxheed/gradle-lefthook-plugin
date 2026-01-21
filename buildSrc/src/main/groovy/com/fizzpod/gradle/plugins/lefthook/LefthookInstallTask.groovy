@@ -1,12 +1,12 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile

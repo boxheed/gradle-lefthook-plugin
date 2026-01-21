@@ -53,7 +53,7 @@ public class LefthookPlugin implements Plugin<Project> {
         }
 
 		project.afterEvaluate { proj -> 
-			def autoInstall = extension.getAutoInstall().get();
+			def autoInstall = extension.getAutoInstall().get()
 			def autoTaskName = extension.getAutoTaskName().get()
 			Loggy.debug("Auto installing lefthook: {}", autoInstall)
 			if(autoInstall) {
