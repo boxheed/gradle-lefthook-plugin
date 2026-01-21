@@ -30,7 +30,7 @@ public abstract class LefthookHelpTask extends DefaultTask {
 
         return taskContainer.create([name: NAME,
             type: LefthookHelpTask,
-            dependsOn: [],
+            dependsOn: [LefthookDownloadTask.NAME],
             group: LefthookPlugin.GROUP,
             description: 'Outputs the current lefthook help'])
     }

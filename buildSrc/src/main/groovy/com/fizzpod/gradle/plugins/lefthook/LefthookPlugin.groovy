@@ -55,7 +55,7 @@ public class LefthookPlugin implements Plugin<Project> {
         }
 
         helpTask.configure { task ->
-            task.getLefthookBinary().set(rcTask.getLefthookBinary())
+            task.getLefthookBinary().set(downloadTask.getLefthookBinary())
         }
 
 		project.afterEvaluate { proj -> 
@@ -71,7 +71,6 @@ public class LefthookPlugin implements Plugin<Project> {
 					Loggy.warn("Lefthook auto install requested, but '${autoTaskName}' task not found. Please ensure the 'check' task exists or manually call 'lefthookInstall'.")
 				}
 			}
-			//Loggy.debug("config {}", config)
 		}
 	}
 

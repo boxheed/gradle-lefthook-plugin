@@ -60,12 +60,19 @@ class LefthookPluginSpec extends Specification {
    
     def "run lefthookHelpTask"() {
         setup:
-        
             Project project = ProjectBuilder.builder().withProjectDir(temporaryFolder.getRoot()).build()
+            def lefthookDir = new File(temporaryFolder.getRoot(), ".lefthook")
+            def binary = new File(lefthookDir, "lefthook_v1.0.0_linux_amd64")
+            binary.createParentDirectories()
+            binary.text = """#!/bin/sh
+                echo "bananas" """
+            binary.setExecutable(true)
+
         when:
             def plugin = new LefthookPlugin()
             plugin.apply(project)
             def task = project.getTasksByName(LefthookHelpTask.NAME, false).iterator().next()
+            task.setLefthookBinary(binary)
             task.runTask()
         then: 
             !project.getTasksByName(LefthookHelpTask.NAME, false).isEmpty()
@@ -99,12 +106,17 @@ class LefthookPluginSpec extends Specification {
 
     def "run lefthookRcTask"() {
         setup:
-        
             Project project = ProjectBuilder.builder().withProjectDir(temporaryFolder.getRoot()).build()
+            def lefthookDir = new File(temporaryFolder.getRoot(), ".lefthook")
+            def binary = new File(lefthookDir, "lefthook_v1.0.0_linux_amd64")
+            binary.createParentDirectories()
+            binary.text = "dummy content"
+            binary.setExecutable(true)
         when:
             def plugin = new LefthookPlugin()
             plugin.apply(project)
             def task = project.getTasksByName(LefthookRcTask.NAME, false).iterator().next()
+            task.setLefthookBinary(binary)
             task.runTask()
         then: 
             !project.getTasksByName(LefthookRcTask.NAME, false).isEmpty()
