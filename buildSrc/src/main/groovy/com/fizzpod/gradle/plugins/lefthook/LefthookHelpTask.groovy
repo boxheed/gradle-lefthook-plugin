@@ -16,16 +16,14 @@ public abstract class LefthookHelpTask extends DefaultTask {
 
     public static final String NAME = "lefthookHelp"
 
-    @Internal
-    abstract DirectoryProperty getLefthookLocation()
+    @InputFile
+    abstract RegularFileProperty getLefthookBinary()
 
     @Inject
     abstract ExecOperations getExecOperations()
 
     @Inject
     public LefthookHelpTask(Project project) {
-        def extension = project.extensions.getByType(LefthookPluginExtension)
-        getLefthookLocation().convention(extension.getLocation())
     }
 
     static register(Project project) {
@@ -41,29 +39,9 @@ public abstract class LefthookHelpTask extends DefaultTask {
 
     @TaskAction
     def runTask() {
-        def binary = LefthookInstallation.findBinary(getLefthookLocation().getAsFile().get())
-        
+        def binary = getLefthookBinary().getAsFile().get()
         getExecOperations().exec { spec ->
             spec.commandLine(binary.absolutePath, "help")
         }
     }
-
-    static def run = { context ->
-        return null
-    }
-
-    static def getOut = Loggy.wrap( { x -> 
-            def out = x.sout? x.sout.trim(): ""
-            return out
-        })
-
-    static def command = Loggy.wrap( { x ->
-        def commandParts = []
-        commandParts.add(x.binary.getAbsolutePath())
-        commandParts.add("help")
-        x.command = commandParts.join(" ")
-        return x
-    } )
-        
-
 }

@@ -32,7 +32,7 @@ public abstract class LefthookLocalTask extends DefaultTask {
 
         return taskContainer.create([name: NAME,
             type: LefthookLocalTask,
-            dependsOn: [],
+            dependsOn: [LefthookRcTask.NAME],
             group: LefthookPlugin.GROUP,
             description: 'Creates the lefthook-local.yml file'])
     }

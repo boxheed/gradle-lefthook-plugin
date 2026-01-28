@@ -14,23 +14,26 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecOperations
 
-public abstract class LefthookVersionTask extends DefaultTask {
+public abstract class LefthookBinaryTask extends DefaultTask {
 
-    public static final String NAME = "lefthookVersion"
+    public static final String NAME = "lefthookBinary"
 
     @InputDirectory
     abstract DirectoryProperty getLefthookLocation()
-
-    @Inject
-    abstract ExecOperations getExecOperations()
 
     @Internal
     abstract RegularFileProperty getLefthookBinary()
 
     @Inject
-    public LefthookVersionTask(Project project) {
+    public LefthookBinaryTask(Project project) {
+        def providers = project.getProviders()
         def extension = project.extensions.getByType(LefthookPluginExtension)
         getLefthookLocation().convention(extension.getLocation())
+        getLefthookBinary().fileProvider(providers.provider({
+                File dirFile = getLefthookLocation().getAsFile().get()
+                return LefthookInstallation.findBinary(dirFile)
+            })
+        )
     }
 
     static register(Project project) {
@@ -38,18 +41,16 @@ public abstract class LefthookVersionTask extends DefaultTask {
         def taskContainer = project.getTasks()
 
         return taskContainer.create([name: NAME,
-            type: LefthookVersionTask,
+            type: LefthookBinaryTask,
             dependsOn: [],
-            group: LefthookPlugin.GROUP,
-            description: 'Outputs the current lefthook version'])
+            group: LefthookPlugin.GROUP])
     }
 
     @TaskAction
     def runTask() {
-        def binary = LefthookInstallation.findBinary(getLefthookLocation().getAsFile().get())
-        getLefthookBinary().set(binary)
-        getExecOperations().exec { spec ->
-            spec.commandLine(binary.absolutePath, "version")
+        def binary = getLefthookBinary().getAsFile().get()
+        if (binary == null || !binary.exists()) {
+            throw new IllegalStateException("Lefthook binary not found at expected location: " + getLefthookLocation().getAsFile().get())
         }
     }
 

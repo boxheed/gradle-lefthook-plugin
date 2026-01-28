@@ -14,9 +14,9 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.yaml.snakeyaml.Yaml
 
-public abstract class LefthookInitTask extends DefaultTask {
+public abstract class LefthookYmlTask extends DefaultTask {
 
-    public static final String NAME = "lefthookInit"
+    public static final String NAME = "lefthookYml"
 
     @Internal
     abstract MapProperty<String, Object> getConfig()
@@ -35,7 +35,7 @@ public abstract class LefthookInitTask extends DefaultTask {
     abstract RegularFileProperty getLefthookConfigFile()
 
     @Inject
-    public LefthookInitTask(Project project) {
+    public LefthookYmlTask(Project project) {
         getConfig().convention([:])
         getLefthookConfigFile().convention(project.layout.projectDirectory.file("lefthook.yml"))
     }
@@ -45,7 +45,7 @@ public abstract class LefthookInitTask extends DefaultTask {
         def taskContainer = project.getTasks()
 
         return taskContainer.create([name: NAME,
-            type: LefthookInitTask,
+            type: LefthookYmlTask,
             dependsOn: [],
             group: LefthookPlugin.GROUP,
             description: 'Creates the lefthook.yml file'])

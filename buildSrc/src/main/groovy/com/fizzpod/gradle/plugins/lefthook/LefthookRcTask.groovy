@@ -11,6 +11,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 
 public abstract class LefthookRcTask extends DefaultTask {
@@ -39,7 +40,7 @@ public abstract class LefthookRcTask extends DefaultTask {
 
         return taskContainer.create([name: NAME,
             type: LefthookRcTask,
-            dependsOn: [LefthookDownloadTask.NAME],
+            dependsOn: [LefthookBinaryTask.NAME],
             group: LefthookPlugin.GROUP,
             description: 'Creates the lefthookrc file'])
     }
@@ -49,7 +50,7 @@ public abstract class LefthookRcTask extends DefaultTask {
         def binary = getLefthookBinary().getAsFile().get()
         def rcFile = getLefthookRcFile().getAsFile().get()
         def rcConfig = getRcConfiguration().get()
-        
+        println("Left ${binary.getAbsolutePath()}")
         rcFile.withWriter { writer ->
             writer.writeLine "export LEFTHOOK_BIN=${binary.getAbsolutePath()}"
             writer.writeLine rcConfig

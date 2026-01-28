@@ -36,7 +36,7 @@ public class LefthookScriptInstaller {
 
     static def doInstall = Loggy.wrap( { context ->
         def config = Optional.ofNullable(context)
-            .map(x -> LefthookDownloadTask.location(x))
+            .map(x -> LefthookScriptInstaller.location(x))
             .map(x -> LefthookScriptInstaller.resolveDownloader(x))
             .map(x -> LefthookScriptInstaller.resolveHookLocation(x))
             .map(x -> LefthookScriptInstaller.resolveHookFile(x))
@@ -113,6 +113,13 @@ public class LefthookScriptInstaller {
         config[hookName] = ["runner":"bash"]
         return hookName
       //  return x
+    })
+
+    static def location = Loggy.wrap({ x ->
+        def projectDir = x.project.rootDir
+        def lefthookDir = x.extension.location
+        x.location = lefthookDir.getAsFile().get()
+        return x.location? x: null
     })
 
 }
