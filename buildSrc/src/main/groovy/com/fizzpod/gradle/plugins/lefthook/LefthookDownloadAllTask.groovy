@@ -6,13 +6,21 @@ import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.OutputFile
 
 
-public class LefthookDownloadAllTask extends DefaultTask {
+
+public abstract class LefthookDownloadAllTask extends DefaultTask {
 
     public static final String NAME = "lefthookDownloadAll"
 
-    private Project project
     private def osArches = [
         [OS.Family.LINUX.id, OS.Arch.AMD64.id],
         [OS.Family.LINUX.id, OS.Arch.ARM64.id],
@@ -21,9 +29,26 @@ public class LefthookDownloadAllTask extends DefaultTask {
         [OS.Family.WINDOWS.id, OS.Arch.AMD64.id]
     ]
 
+    private Project project
+
+    @Input
+    abstract Property<String> getLefthookVersion()
+
+    @Input
+    abstract Property<String> getLefthookRepository()
+
+    @InputDirectory
+    abstract DirectoryProperty getLefthookLocation()
+
     @Inject
     public LefthookDownloadAllTask(Project project) {
         this.project = project
+        this.project = project
+        def providers = project.getProviders()
+        def extension = project.extensions.getByType(LefthookPluginExtension)
+        getLefthookVersion().convention(extension.getVersion())
+        getLefthookRepository().convention(extension.getRepository())
+        getLefthookLocation().convention(extension.getLocation())
     }
 
     static register(Project project) {
@@ -39,12 +64,12 @@ public class LefthookDownloadAllTask extends DefaultTask {
 
     @TaskAction
     def runTask() {
-        def extension = project.extensions.getByType(LefthookPluginExtension)
+
         for(def osArch: osArches) {
             def context = [:]
-            context.version = extension.getVersion().get()
-            context.repository = extension.getRepository().get()
-            context.location = extension.getLocation().getAsFile().get()
+            context.version = getLefthookVersion().get()
+            context.repo = getLefthookRepository().get()
+            context.location = getLefthookLocation().getAsFile().get()
             
             context.os = OS.getOs(osArch[0])
             context.arch = OS.getArch(osArch[1])
