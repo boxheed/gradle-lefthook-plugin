@@ -105,13 +105,11 @@ public class LefthookInstallation {
     }.memoize()
 
     static def os = Loggy.wrap({def x ->
-        //x.os = OS.getOs(x.params.os)
         x.os = x.params.os
         x.os? x: null
     }.memoize())
 
     static def arch = Loggy.wrap({def x ->
-        //x.arch = OS.getArch(x.params.arch)
         x.arch = x.params.arch
         x.arch? x: null
     }.memoize())

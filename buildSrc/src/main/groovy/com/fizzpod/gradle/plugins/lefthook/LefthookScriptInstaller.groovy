@@ -41,7 +41,6 @@ public class LefthookScriptInstaller {
             .map(x -> LefthookScriptInstaller.resolveHookLocation(x))
             .map(x -> LefthookScriptInstaller.resolveHookFile(x))
             .map(x -> LefthookScriptInstaller.download(x))
-            //.map(x -> LefthookScriptInstaller.setExecute(x))
             .map(x -> LefthookScriptInstaller.createConfig(x))
             .orElseThrow(() -> new RuntimeException("Unable to install " + resource))
         return config

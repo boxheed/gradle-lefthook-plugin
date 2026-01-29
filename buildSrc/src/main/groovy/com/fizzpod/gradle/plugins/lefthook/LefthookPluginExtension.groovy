@@ -11,22 +11,7 @@ import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 
 public abstract class LefthookPluginExtension implements GroovyInterceptable {
-    /*
-    static def DEFAULT_OPTIONS = [
-        "version": "latest",
-        "location": ".lefthook",
-        "repository": "evilmartians/lefthook",
-        "prefix": "v",
-        "os": null,
-        "arch": null,
-        "project": null,
-        "autoInstall": true,
-        "rc": {""},
-        "ttl": 1000 * 60 * 60 * 24,
-        "binary": null
-    ]
-    */
-
+    
     @Inject
     protected abstract Project getProject()
 
@@ -44,9 +29,9 @@ public abstract class LefthookPluginExtension implements GroovyInterceptable {
         // Set convention for the managed property
         getConfig().convention([:])
         getAutoInstall().convention(false)
-        getAutoTaskName().convention("check")
+        getAutoTaskName().convention("assemble")
         getVersion().convention("latest")
-        getLocation().convention(project.layout.projectDirectory.dir(".lefthook"))
+        getLocation().convention(getProject().layout.projectDirectory.dir(".lefthook"))
         getRepository().convention("evilmartians/lefthook")
         getRc().convention("")
     }

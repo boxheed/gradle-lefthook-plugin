@@ -29,11 +29,6 @@ public abstract class LefthookBinaryTask extends DefaultTask {
         def providers = project.getProviders()
         def extension = project.extensions.getByType(LefthookPluginExtension)
         getLefthookLocation().convention(extension.getLocation())
-        getLefthookBinary().fileProvider(providers.provider({
-                File dirFile = getLefthookLocation().getAsFile().get()
-                return LefthookInstallation.findBinary(dirFile)
-            })
-        )
     }
 
     static register(Project project) {
@@ -48,7 +43,9 @@ public abstract class LefthookBinaryTask extends DefaultTask {
 
     @TaskAction
     def runTask() {
-        def binary = getLefthookBinary().getAsFile().get()
+        File dirFile = getLefthookLocation().getAsFile().get()
+        def binary = LefthookInstallation.findBinary(dirFile)
+        getLefthookBinary().set(binary)
         if (binary == null || !binary.exists()) {
             throw new IllegalStateException("Lefthook binary not found at expected location: " + getLefthookLocation().getAsFile().get())
         }

@@ -6,10 +6,12 @@ import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
@@ -21,6 +23,9 @@ public abstract class LefthookRcTask extends DefaultTask {
     @InputFile
     abstract RegularFileProperty getLefthookBinary()
 
+    @InputDirectory
+    abstract DirectoryProperty getLefthookLocation()
+
     @Input
     abstract Property<String> getRcConfiguration()
 
@@ -30,8 +35,14 @@ public abstract class LefthookRcTask extends DefaultTask {
     @Inject
     public LefthookRcTask(Project project) {
         def extension = project.extensions.getByType(LefthookPluginExtension)
+        def providers = project.getProviders()
+        getLefthookLocation().convention(extension.getLocation())
         getRcConfiguration().convention(extension.getRc())
-        getLefthookRcFile().convention(extension.getLocation().file(".lefthookrc"))
+        getLefthookRcFile().fileProvider(providers.provider({
+                File dirFile = getLefthookLocation().getAsFile().get()
+                return new File(dirFile, ".lefthookrc")
+            })
+        )
     }
 
     static register(Project project) {
@@ -56,52 +67,4 @@ public abstract class LefthookRcTask extends DefaultTask {
             writer.writeLine rcConfig
         }
     }
-    
-    // Kept for backward compatibility
-    static def run = { context ->
-        def status = Optional.ofNullable(context)
-            .map(x -> LefthookDownloadTask.run(x))
-            .map(x -> LefthookRcTask.writeRc(x))
-            .map(x -> LefthookRcTask.command(x))
-            .map(x -> Command.execute(x))
-            .orElseThrow(() -> new RuntimeException("Unable to run lefthook"))
-        return status
-    }
-
-    static def writeRc = Loggy.wrap( { x ->
-        def binary = x.binary.getAbsolutePath()
-        def rc = new File(x.location, ".lefthookrc")
-        rc.withWriter { writer ->
-            writer.writeLine "export LEFTHOOK_BIN=${binary}"
-            def rcContent = x.extension.getRc().get()
-            writer.writeLine rcContent
-        }
-        x.rc = rc
-        return x
-    })
-
-    static def writeLocal = Loggy.wrap( { x ->
-        def binary = x.binary.getAbsolutePath()
-        def lefthookLocal = x.project.file('lefthook-local.yml')
-        def rcPath = x.rc.getAbsolutePath()
-        lefthookLocal.withWriter { writer ->
-            writer.writeLine "rc: ${rcPath}"
-        }
-        return x
-    })
-
-    static def getOut = Loggy.wrap( { x -> 
-        def out = x.sout? x.sout.trim(): ""
-        return out
-    })
-
-    static def command = Loggy.wrap( { x ->
-        def commandParts = []
-        commandParts.add(x.binary.getAbsolutePath())
-        commandParts.add("install")
-        commandParts.add("-f")
-        x.command = commandParts.join(" ")
-        return x
-    } )
-
 }

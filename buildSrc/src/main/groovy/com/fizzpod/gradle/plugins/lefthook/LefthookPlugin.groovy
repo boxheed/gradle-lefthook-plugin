@@ -20,6 +20,9 @@ public class LefthookPlugin implements Plugin<Project> {
 		def downloadTask = LefthookDownloadTask.register(project)
 		def downloadAllTask = LefthookDownloadAllTask.register(project)
 		def binaryTask = LefthookBinaryTask.register(project)
+        binaryTask.configure { task ->
+            task.dependsOn(downloadTask)
+        }
 		def versionTask = LefthookVersionTask.register(project)
 		def helpTask = LefthookHelpTask.register(project)
 		def rcTask = LefthookRcTask.register(project)
@@ -28,34 +31,30 @@ public class LefthookPlugin implements Plugin<Project> {
 		def installTask = LefthookInstallTask.register(project)
 
 		versionTask.configure { task ->
-			task.getLefthookBinary().set(binaryTask.getLefthookBinary())
+			task.getLefthookBinary().value(binaryTask.getLefthookBinary())
         }
 
 		helpTask.configure { task ->
-			task.getLefthookBinary().set(binaryTask.getLefthookBinary())
+			task.getLefthookBinary().value(binaryTask.getLefthookBinary())
         }
 
         rcTask.configure { task ->
-           task.getLefthookBinary().set(binaryTask.getLefthookBinary())
+           task.getLefthookBinary().value(binaryTask.getLefthookBinary())
         }
         
         localTask.configure { task ->
-            task.getLefthookRcFile().set(rcTask.getLefthookRcFile())
+            task.getLefthookRcFile().value(rcTask.getLefthookRcFile())
         }
         
         ymlTask.configure { task ->
-            task.getConfig().set(extension.getConfig())
+            task.getConfig().value(extension.getConfig())
         }
         
         installTask.configure { task ->
-            task.getLefthookBinary().set(rcTask.getLefthookBinary())
-            task.getLefthookConfigFile().set(ymlTask.getLefthookConfigFile())
-            task.getLefthookLocalFile().set(localTask.getLefthookLocalFile())
-            task.getLefthookRcFile().set(rcTask.getLefthookRcFile())
-        }
-        
-        versionTask.configure { task ->
-//            task.getLefthookBinary().set(rcTask.getLefthookBinary())
+            task.getLefthookBinary().value(binaryTask.getLefthookBinary())
+            task.getLefthookConfigFile().value(ymlTask.getLefthookConfigFile())
+            task.getLefthookLocalFile().value(localTask.getLefthookLocalFile())
+            task.getLefthookRcFile().value(rcTask.getLefthookRcFile())
         }
 
 		project.afterEvaluate { proj -> 
@@ -64,9 +63,9 @@ public class LefthookPlugin implements Plugin<Project> {
 			Loggy.debug("Auto installing lefthook: {}", autoInstall)
 			if(autoInstall) {
 				Loggy.lifecycle("Auto installing lefthook")
-				def checkTask = proj.tasks.findByName(autoTaskName)
-				if(checkTask) {
-					checkTask.dependsOn installTask
+				def autoTask = proj.tasks.findByName(autoTaskName)
+				if(autoTask != null) {
+					autoTask.dependsOn installTask
 				} else {
 					Loggy.warn("Lefthook auto install requested, but '${autoTaskName}' task not found. Please ensure the 'check' task exists or manually call 'lefthookInstall'.")
 				}

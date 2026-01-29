@@ -18,19 +18,14 @@ public abstract class LefthookVersionTask extends DefaultTask {
 
     public static final String NAME = "lefthookVersion"
 
-    @InputDirectory
-    abstract DirectoryProperty getLefthookLocation()
-
     @Inject
     abstract ExecOperations getExecOperations()
 
-    @Internal
+    @InputFile
     abstract RegularFileProperty getLefthookBinary()
 
     @Inject
     public LefthookVersionTask(Project project) {
-        def extension = project.extensions.getByType(LefthookPluginExtension)
-        getLefthookLocation().convention(extension.getLocation())
     }
 
     static register(Project project) {
@@ -39,15 +34,14 @@ public abstract class LefthookVersionTask extends DefaultTask {
 
         return taskContainer.create([name: NAME,
             type: LefthookVersionTask,
-            dependsOn: [],
+            dependsOn: [LefthookBinaryTask.NAME],
             group: LefthookPlugin.GROUP,
             description: 'Outputs the current lefthook version'])
     }
 
     @TaskAction
     def runTask() {
-        def binary = LefthookInstallation.findBinary(getLefthookLocation().getAsFile().get())
-        getLefthookBinary().set(binary)
+        def binary = getLefthookBinary().getAsFile().get()
         getExecOperations().exec { spec ->
             spec.commandLine(binary.absolutePath, "version")
         }

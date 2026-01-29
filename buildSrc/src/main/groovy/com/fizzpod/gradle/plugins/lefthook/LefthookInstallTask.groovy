@@ -8,6 +8,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
@@ -29,11 +30,8 @@ public abstract class LefthookInstallTask extends DefaultTask {
     @InputFile
     abstract RegularFileProperty getLefthookRcFile()
 
-    @OutputDirectory
+    @Internal
     abstract DirectoryProperty getGitHooksDir()
-
-    @OutputFile
-    abstract RegularFileProperty getLefthookChecksumFile()
     
     @Inject
     abstract ExecOperations getExecOperations()
@@ -41,7 +39,6 @@ public abstract class LefthookInstallTask extends DefaultTask {
     @Inject
     public LefthookInstallTask(Project project) {
         getGitHooksDir().convention(project.layout.projectDirectory.dir(".git/hooks"))
-        getLefthookChecksumFile().convention(project.layout.projectDirectory.file("lefthook.checksum"))
     }
 
     static register(Project project) {
@@ -65,14 +62,4 @@ public abstract class LefthookInstallTask extends DefaultTask {
             spec.workingDir = project.projectDir
         }
     }
-    
-    // Kept for backward compatibility
-    static def run = Loggy.wrap({ context ->
-        return Optional.ofNullable(context)
-            .map(x -> LefthookDownloadTask.run(x))
-            .map(x -> LefthookRcTask.run(x))
-            .map(x -> LefthookLocalTask.run(x))
-            .map(x -> LefthookInitTask.run(x))
-            .orElseThrow(() -> new RuntimeException("Unable to install lefthook"))
-    })
 }

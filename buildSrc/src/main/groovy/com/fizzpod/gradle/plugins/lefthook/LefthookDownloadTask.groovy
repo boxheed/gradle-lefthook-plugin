@@ -39,7 +39,7 @@ public abstract class LefthookDownloadTask extends DefaultTask {
     @Input
     abstract Property<String> getLefthookRepository()
 
-    @InputDirectory
+    @OutputDirectory
     abstract DirectoryProperty getLefthookLocation()
 
     @Inject
@@ -53,15 +53,15 @@ public abstract class LefthookDownloadTask extends DefaultTask {
         getTtl().convention(86400000) // 1 day
         getLastModified().value(providers.provider({
                 //used to force the gradle up to date check to fail and force a download check
-                File dirFile = getLefthookLocation().getAsFile().get()
+                File dirFile = extension.getLocation().getAsFile().get()
                 def binary = LefthookInstallation.findBinary(dirFile)
-                def insideTtl =  binary.exists() && (System.currentTimeMillis() - FileUtils.lastModified(binary) < getTtl().get()) // 1 day
+                def insideTtl =  binary && binary.exists() && (System.currentTimeMillis() - FileUtils.lastModified(binary) < getTtl().get()) // 1 day
                 def lastModified = 0L
-                if(binary.exists()) {
+                if(binary && binary.exists()) {
                     lastModified = FileUtils.lastModified(binary)
                 }
                 //calculate a new modified date for the binary
-                if(!insideTtl && binary.exists()) {
+                if(!insideTtl) {
                     lastModified = System.currentTimeMillis()
                     // round to the nearest second as filesystem times are not as granular as system times
                     lastModified = Math.round(lastModified / 1000.0) * 1000L
@@ -72,7 +72,7 @@ public abstract class LefthookDownloadTask extends DefaultTask {
 
         getLefthookBinary().fileProvider(providers.provider( {
 				
-                File dirFile = getLefthookLocation().getAsFile().get()
+                File dirFile = extension.getLocation().getAsFile().get()
                 def binary = LefthookInstallation.findBinary(dirFile)
                 if(binary == null) {
                     return null;
@@ -118,7 +118,7 @@ public abstract class LefthookDownloadTask extends DefaultTask {
     }
 
     static def touch = { context ->
-        if(context.binary.exists() && context.lastModified > 0L) {
+        if(context.binary && context.binary.exists() && context.lastModified > 0L) {
             context.binary.setLastModified(context.lastModified)
         }
         return context
