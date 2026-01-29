@@ -1,42 +1,38 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
-public class LefthookPluginExtension implements GroovyInterceptable {
-    static def DEFAULT_OPTIONS = [
-        "version": "latest",
-        "location": ".lefthook",
-        "repository": "evilmartians/lefthook",
-        "prefix": "v",
-        "os": null,
-        "arch": null,
-        "project": null,
-        "autoInstall": true,
-        "rc": {""},
-        "ttl": 1000 * 60 * 60 * 24,
-        "binary": null
-    ]
+import javax.inject.Inject
+import org.gradle.api.Project
+import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.MapProperty
+import org.gradle.api.provider.Property
 
-    def config = [:]
-    def options = [:]
+public abstract class LefthookPluginExtension implements GroovyInterceptable {
+    
+    @Inject
+    protected abstract Project getProject()
 
-    void setProperty(String key, value) {
-        Loggy.debug("setProperty: {}, {}", key, value)
-        config[key] = value
-    }
-   
-    def getProperty(String key) {
-        Loggy.debug("getProperty: {}", key)
-        if(key.equalsIgnoreCase("config")) {
-            return this.config
-        } else {
-            return this.config[key]
-        }
-    } 
+    // Abstract property for Gradle to manage
+    abstract MapProperty<String, Object> getConfig()
+    abstract Property<Boolean> getAutoInstall()
+    abstract Property<String> getAutoTaskName()
+    abstract Property<String> getVersion()
+    abstract DirectoryProperty getLocation()
+    abstract Property<String> getRepository()
+    abstract Property<String> getRc()
 
-    def invokeMethod(String key, args) {
-        Loggy.debug("invokeMethod: {}, {}", key, args)
-        throw new RuntimeException(key)
-        config[key] = args
+    @Inject
+    public LefthookPluginExtension(ObjectFactory objects) {
+        // Set convention for the managed property
+        getConfig().convention([:])
+        getAutoInstall().convention(false)
+        getAutoTaskName().convention("assemble")
+        getVersion().convention("latest")
+        getLocation().convention(getProject().layout.projectDirectory.dir(".lefthook"))
+        getRepository().convention("evilmartians/lefthook")
+        getRc().convention("")
     }
 }

@@ -1,4 +1,4 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
@@ -14,35 +14,22 @@ import org.slf4j.LoggerFactory
 
 class LefthookPluginHelper {
 
+    
     static def createContext = Loggy.wrap( {Project project ->
         def context = [:]
         context.project = project
-        context.extension = LefthookPluginHelper.getOptions(project)
-        context.options = context.extension
-        context.config = LefthookPluginHelper.getConfig(project)
+        context.projectDir = project.projectDir
+        context.rootDir = project.rootDir
+       // context.options = LefthookPluginHelper.getOptions(project)
+        context.extension = getExtension(project)
+        
+        //context.config = LefthookPluginHelper.getConfig(project)
         return context
     })
-
-    static def getOptions = Loggy.wrap( {Project project ->
-        Loggy.debug("Finding options")
-        def extension = getExtension(project, "options")
-        def config = extension != null? extension.config: [:]
-        def options = config["options"] != null? config["options"]: [:] 
-        if(options instanceof Closure) {
-            def optionsMap = [:]
-            options.resolveStrategy = Closure.DELEGATE_ONLY
-            options.delegate = optionsMap
-            options.call()
-            options = optionsMap
-        }
-        options = merge(LefthookPluginExtension.DEFAULT_OPTIONS, options)
-        Loggy.debug("Lefthook Plugin Options {}", options)
-        return options
-    })
-
+    
     static def getConfig = Loggy.wrap( {Project project ->
         Loggy.debug("Finding config")
-        def extension = getExtension(project, "options")
+        def extension = getExtension(project)
         def config = extension != null? extension.config: [:]
         config = config["config"] != null? config["config"]: [:] 
         if(config instanceof Closure) {
@@ -52,7 +39,7 @@ class LefthookPluginHelper {
         return config
     })
 
-    static getExtension(Project project, String name) {
+    static getExtension(Project project) {
         def extension = project[LefthookPlugin.NAME]
         return extension
     }
