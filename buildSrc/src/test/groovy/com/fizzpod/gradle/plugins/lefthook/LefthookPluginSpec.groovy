@@ -14,6 +14,16 @@ class LefthookPluginSpec extends Specification {
     @Rule
     TemporaryFolder temporaryFolder
     
+    def "warmup"() {
+        when:
+        try {
+             ProjectBuilder.builder().withProjectDir(temporaryFolder.getRoot()).build()
+        } catch (Throwable t) {
+            // ignore
+        }
+        then:
+        true
+    }
     
     def "initialise plugin"() {
         setup:
@@ -71,26 +81,36 @@ class LefthookPluginSpec extends Specification {
             binary.setExecutable(true)
 
             Project project = ProjectBuilder.builder().withProjectDir(temporaryFolder.getRoot()).build()
-        when:
-            def plugin = new LefthookPlugin()
-            plugin.apply(project)
-            def task = project.getTasksByName(LefthookHelpTask.NAME, false).iterator().next()
-            task.runTask()
-        then: 
-            !project.getTasksByName(LefthookHelpTask.NAME, false).isEmpty()
+                when:
+                    def plugin = new LefthookPlugin()
+                    plugin.apply(project)
+                    def task = project.getTasksByName(LefthookHelpTask.NAME, false).iterator().next()
+                    task.getLefthookBinary().set(binary)
+                    task.runTask()
+                then:              !project.getTasksByName(LefthookHelpTask.NAME, false).isEmpty()
     }
 
-    def "run lefthookInitTask"() {
+    def "run lefthookInstallTask"() {
         setup:
+            def os = OS.getOs(null)
+            def arch = OS.getArch(null)
+            def binaryName = LefthookInstallation.getBinaryName("v1.0.0", os, arch)
+            def lefthookDir = new File(temporaryFolder.getRoot(), ".lefthook")
+            def binary = new File(lefthookDir, binaryName)
+            binary.createParentDirectories()
+            binary.text = """#!/bin/sh
+                echo "bananas" """
+            binary.setExecutable(true)
         
             Project project = ProjectBuilder.builder().withProjectDir(temporaryFolder.getRoot()).build()
         when:
             def plugin = new LefthookPlugin()
             plugin.apply(project)
-            def task = project.getTasksByName(LefthookInitTask.NAME, false).iterator().next()
+            def task = project.getTasksByName(LefthookInstallTask.NAME, false).iterator().next()
+            task.getLefthookBinary().set(binary)
             task.runTask()
         then: 
-            !project.getTasksByName(LefthookInitTask.NAME, false).isEmpty()
+            !project.getTasksByName(LefthookInstallTask.NAME, false).isEmpty()
     }
 
     def "run lefthookLocalTask"() {

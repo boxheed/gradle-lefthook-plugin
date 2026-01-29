@@ -2,11 +2,11 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
+import java.util.concurrent.Callable
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
-import java.util.concurrent.Callable
 
 public class LefthookPlugin implements Plugin<Project> {
 

@@ -3,19 +3,18 @@
 package com.fizzpod.gradle.plugins.lefthook
 
 import javax.inject.Inject
+import org.apache.commons.io.FileUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
-
-import org.apache.commons.io.FileUtils
 
 public abstract class LefthookDownloadTask extends DefaultTask {
 
@@ -75,7 +74,7 @@ public abstract class LefthookDownloadTask extends DefaultTask {
                 File dirFile = extension.getLocation().getAsFile().get()
                 def binary = LefthookInstallation.findBinary(dirFile)
                 if(binary == null) {
-                    return null;
+                    return null
                 }
                 return dirFile.toPath().resolve(binary.name).toFile()
             })
