@@ -1,23 +1,84 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
 import javax.inject.Inject
+import org.apache.commons.io.FileUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
-public class LefthookDownloadTask extends DefaultTask {
+public abstract class LefthookDownloadTask extends DefaultTask {
 
     public static final String NAME = "lefthookDownload"
 
-    public static final String LEFTHOOK_INSTALL_DIR = ".lefthook"
-
     private Project project
+
+    @Optional
+    @OutputFile
+    abstract RegularFileProperty getLefthookBinary()
+
+    @Input
+    abstract Property<Long> getLastModified()
+
+    @Input
+    abstract Property<Long> getTtl()
+
+    @Input
+    abstract Property<String> getLefthookVersion()
+
+    @Input
+    abstract Property<String> getLefthookRepository()
+
+    @OutputDirectory
+    abstract DirectoryProperty getLefthookLocation()
 
     @Inject
     public LefthookDownloadTask(Project project) {
         this.project = project
+        def providers = project.getProviders()
+        def extension = project.extensions.getByType(LefthookPluginExtension)
+        getLefthookVersion().convention(extension.getVersion())
+        getLefthookRepository().convention(extension.getRepository())
+        getLefthookLocation().convention(extension.getLocation())
+        getTtl().convention(86400000) // 1 day
+        getLastModified().value(providers.provider({
+                //used to force the gradle up to date check to fail and force a download check
+                File dirFile = extension.getLocation().getAsFile().get()
+                def binary = LefthookInstallation.findBinary(dirFile)
+                def insideTtl =  binary && binary.exists() && (System.currentTimeMillis() - FileUtils.lastModified(binary) < getTtl().get()) // 1 day
+                def lastModified = 0L
+                if(binary && binary.exists()) {
+                    lastModified = FileUtils.lastModified(binary)
+                }
+                //calculate a new modified date for the binary
+                if(!insideTtl) {
+                    lastModified = System.currentTimeMillis()
+                    // round to the nearest second as filesystem times are not as granular as system times
+                    lastModified = Math.round(lastModified / 1000.0) * 1000L
+                }
+                return lastModified
+            })
+        )
+
+        getLefthookBinary().fileProvider(providers.provider( {
+				
+                File dirFile = extension.getLocation().getAsFile().get()
+                def binary = LefthookInstallation.findBinary(dirFile)
+                if(binary == null) {
+                    return null
+                }
+                return dirFile.toPath().resolve(binary.name).toFile()
+            })
+        )
     }
 
     static register(Project project) {
@@ -33,82 +94,33 @@ public class LefthookDownloadTask extends DefaultTask {
 
     @TaskAction
     def runTask() {
-        def context = LefthookPluginHelper.createContext(project)
+        def context = [:]
+        context.repo = getLefthookRepository().get()
+        context.arch = OS.getArch(null)
+        context.os = OS.getOs(null)
+        context.version = getLefthookVersion().get()
+        context.location = getLefthookLocation().getAsFile().get()
+        context.lastModified = getLastModified().get()
         LefthookDownloadTask.run(context)
     }
 
-    static def run = Loggy.wrap({ context ->
-        return Optional.ofNullable(context)
-            .map(x -> LefthookDownloadTask.location(x))
-            .map(x -> LefthookDownloadTask.ttl(x))
+    static def run = { context ->
+        return java.util.Optional.ofNullable(context)
             .map(x -> LefthookDownloadTask.download(x))
+            .map(x -> LefthookDownloadTask.touch(x))
             .orElseThrow(() -> new RuntimeException("Unable to install lefthook"))
-    })
-
-    /**
-    * Find the most recent binary and see if it is within ttl
-    */
-    static def ttl = { x ->
-        def binary = x.extension.binary
-        if(binary == null || !binary.exists()) {
-            def location = x.location
-            def arch = OS.getArch(x.extension.arch)
-            def os = OS.getOs(x.extension.os)
-            def ttl = x.extension.ttl
-            binary = LefthookDownloadTask.resolveTtl(location, arch, os, ttl)
-        }
-        if(binary != null && binary.exists()) {
-            x.extension.binary = binary
-            x.binary = binary
-        }
-        return x
     }
 
-    static def resolveTtl = {  File location, OS.Arch arch, OS.Family os, long ttl ->
-        def latestBinary = null
-        def currentTime = System.currentTimeMillis()
-        def binaryPattern = LefthookInstallation.getBinaryName("v?(\\d+\\.\\d+\\.\\d+)", os, arch) + ".*"
-        location.listFiles().each { File file ->
-            if (file.name =~ binaryPattern) {
-                Loggy.info("Checking ${file.name}")
-                def lastModified = file.lastModified()
-                def timeDiff = currentTime - lastModified
-                if (timeDiff < ttl) { 
-                    Loggy.info("${file.name} within ttl of ${ttl}")
-                    if(latestBinary != null && latestBinary.lastModified() < file.lastModified()) {
-                        latestBinary = file
-                    } else if (latestBinary == null){
-                        latestBinary = file
-                    }
-                } else {
-                    Loggy.info("${file.name} outide ttl of ${ttl}")
-                }
-            }
-        }
-        if(latestBinary == null) {
-            Loggy.info("lefthook not found")
-        } else {
-            Loggy.info("Using lefthook ${latestBinary}")
-        }
-        return latestBinary
+    static def download = { context ->
+        context.binary = LefthookInstallation.install(context.repo, context.arch, context.os, context.version, context.location)
+        return context
     }
 
-    static def download = Loggy.wrap({ x ->
-        def repo = x.extension.repository
-        def arch = x.extension.arch
-        def os = x.extension.os
-        def version = x.extension.version
-        def location = x.location
-        if(!x.binary || !x.binary.exists()) {
-            x.binary = LefthookInstallation.install(repo, arch, os, version, location)
+    static def touch = { context ->
+        if(context.binary && context.binary.exists() && context.lastModified > 0L) {
+            context.binary.setLastModified(context.lastModified)
         }
-        return x.binary? x: null
-    })
+        return context
+    }
 
-    static def location = Loggy.wrap({ x ->
-        def projectDir = x.project.rootDir
-        def lefthookDir = x.extension.location
-        x.location = new File(projectDir, lefthookDir)
-        return x.location? x: null
-    })
 }

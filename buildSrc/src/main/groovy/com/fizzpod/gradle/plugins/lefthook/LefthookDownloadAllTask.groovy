@@ -1,18 +1,26 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
 
-public class LefthookDownloadAllTask extends DefaultTask {
+
+public abstract class LefthookDownloadAllTask extends DefaultTask {
 
     public static final String NAME = "lefthookDownloadAll"
 
-    private Project project
     private def osArches = [
         [OS.Family.LINUX.id, OS.Arch.AMD64.id],
         [OS.Family.LINUX.id, OS.Arch.ARM64.id],
@@ -21,9 +29,26 @@ public class LefthookDownloadAllTask extends DefaultTask {
         [OS.Family.WINDOWS.id, OS.Arch.AMD64.id]
     ]
 
+    private Project project
+
+    @Input
+    abstract Property<String> getLefthookVersion()
+
+    @Input
+    abstract Property<String> getLefthookRepository()
+
+    @InputDirectory
+    abstract DirectoryProperty getLefthookLocation()
+
     @Inject
     public LefthookDownloadAllTask(Project project) {
         this.project = project
+        this.project = project
+        def providers = project.getProviders()
+        def extension = project.extensions.getByType(LefthookPluginExtension)
+        getLefthookVersion().convention(extension.getVersion())
+        getLefthookRepository().convention(extension.getRepository())
+        getLefthookLocation().convention(extension.getLocation())
     }
 
     static register(Project project) {
@@ -39,32 +64,18 @@ public class LefthookDownloadAllTask extends DefaultTask {
 
     @TaskAction
     def runTask() {
+
         for(def osArch: osArches) {
-            def context = LefthookPluginHelper.createContext(project)
-            context.extension.os = osArch[0]
-            context.extension.arch = osArch[1]
-            Loggy.lifecycle("Installing {} : {}", context.extension.os, context.extension.arch)
+            def context = [:]
+            context.version = getLefthookVersion().get()
+            context.repo = getLefthookRepository().get()
+            context.location = getLefthookLocation().getAsFile().get()
+            
+            context.os = OS.getOs(osArch[0])
+            context.arch = OS.getArch(osArch[1])
+            
+            Loggy.lifecycle("Installing {} : {}", context.os, context.arch)
             LefthookDownloadTask.run(context)
         }
     }
-
-    def getAsset(def context) {
-        context.os = currentOs
-        context.arch = currentArch
-        return super.getAsset(context)
-    }
-    
-    def install(def context) {
-        context.os = currentOs
-        context.arch = currentArch
-        super.install(context)
-    }
-    
-    def download(def context) {
-        context.os = currentOs
-        context.arch = currentArch
-        super.download(context)
-    }
-    
-
 }

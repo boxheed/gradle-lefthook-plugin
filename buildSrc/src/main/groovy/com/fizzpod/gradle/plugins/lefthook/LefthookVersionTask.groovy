@@ -1,21 +1,31 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.gradle.process.ExecOperations
 
-public class LefthookVersionTask extends DefaultTask {
+public abstract class LefthookVersionTask extends DefaultTask {
 
     public static final String NAME = "lefthookVersion"
 
-    private Project project
+    @Inject
+    abstract ExecOperations getExecOperations()
+
+    @InputFile
+    abstract RegularFileProperty getLefthookBinary()
 
     @Inject
     public LefthookVersionTask(Project project) {
-        this.project = project
     }
 
     static register(Project project) {
@@ -24,44 +34,17 @@ public class LefthookVersionTask extends DefaultTask {
 
         return taskContainer.create([name: NAME,
             type: LefthookVersionTask,
-            dependsOn: [],
+            dependsOn: [LefthookBinaryTask.NAME],
             group: LefthookPlugin.GROUP,
             description: 'Outputs the current lefthook version'])
     }
 
     @TaskAction
     def runTask() {
-        def context = LefthookPluginHelper.createContext(project)
-        def result = LefthookVersionTask.run(context)
-        if(result.exit == 0) {
-            Loggy.lifecycle("Lefthook version: \n{}", result.sout? result.sout: "No Changes")
-        } else {
-            Loggy.lifecycle("Lefthook version error: \n{}\n{}", result.serr, result.serr)
+        def binary = getLefthookBinary().getAsFile().get()
+        getExecOperations().exec { spec ->
+            spec.commandLine(binary.absolutePath, "version")
         }
     }
-
-    static def run = { context ->
-        def status = Optional.ofNullable(context)
-            .map(x -> LefthookInstallTask.location(x))
-            .map(x -> LefthookInstallTask.install(x))
-            .map(x -> LefthookVersionTask.command(x))
-            .map(x -> Command.execute(x))
-            .orElseThrow(() -> new RuntimeException("Unable to run lefthook"))
-        return status
-    }
-
-    static def getOut = Loggy.wrap( { x -> 
-            def out = x.sout? x.sout.trim(): ""
-            return out
-        })
-
-    static def command = Loggy.wrap( { x ->
-        def commandParts = []
-        commandParts.add(x.binary.getAbsolutePath())
-        commandParts.add("version")
-        x.command = commandParts.join(" ")
-        return x
-    } )
-        
 
 }

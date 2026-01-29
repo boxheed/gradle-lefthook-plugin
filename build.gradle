@@ -9,7 +9,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath ('com.fizzpod:gradle-plugin-opinion:24.0.1') {
+    classpath ('com.fizzpod:gradle-plugin-opinion:24.1.2') {
       exclude group: 'com.fizzpod', module: 'gradle-lefthook-plugin'
     }
   }
@@ -48,11 +48,10 @@ sourceSets {
 
 
 lefthook {
-  options = {
-    version = "latest"
-    autoInstall = true
-  }
-  config = {
+  version = "latest"
+  rc = "export FOO=bar"
+  autoInstall = ! System.getenv('CI') != null
+  config =
     [
       "assert_lefthook_installed": true,
       "pre-commit": [
@@ -73,7 +72,7 @@ lefthook {
         ]
       ]
     ]
-  }
+  
 }
 
 gitSemver {
@@ -95,4 +94,10 @@ gradlePlugin {
       implementationClass = 'com.fizzpod.gradle.plugins.lefthook.LefthookPlugin'
     }
   }
+}
+
+develocity {
+    buildScan {
+        publishing.onlyIf { false }
+    }
 }

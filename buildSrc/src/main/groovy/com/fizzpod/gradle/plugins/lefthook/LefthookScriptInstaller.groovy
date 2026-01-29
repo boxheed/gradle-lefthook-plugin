@@ -1,4 +1,4 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
@@ -36,12 +36,11 @@ public class LefthookScriptInstaller {
 
     static def doInstall = Loggy.wrap( { context ->
         def config = Optional.ofNullable(context)
-            .map(x -> LefthookDownloadTask.location(x))
+            .map(x -> LefthookScriptInstaller.location(x))
             .map(x -> LefthookScriptInstaller.resolveDownloader(x))
             .map(x -> LefthookScriptInstaller.resolveHookLocation(x))
             .map(x -> LefthookScriptInstaller.resolveHookFile(x))
             .map(x -> LefthookScriptInstaller.download(x))
-            //.map(x -> LefthookScriptInstaller.setExecute(x))
             .map(x -> LefthookScriptInstaller.createConfig(x))
             .orElseThrow(() -> new RuntimeException("Unable to install " + resource))
         return config
@@ -113,6 +112,13 @@ public class LefthookScriptInstaller {
         config[hookName] = ["runner":"bash"]
         return hookName
       //  return x
+    })
+
+    static def location = Loggy.wrap({ x ->
+        def projectDir = x.project.rootDir
+        def lefthookDir = x.extension.location
+        x.location = lefthookDir.getAsFile().get()
+        return x.location? x: null
     })
 
 }

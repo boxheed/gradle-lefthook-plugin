@@ -1,4 +1,4 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
@@ -15,9 +15,7 @@ import org.rauschig.jarchivelib.CompressionType
 
 public class LefthookInstallation {
 
-    public static final String LEFTHOOK_INSTALL_DIR = ".lefthook"
-
-    static def install = { String repo, String arch, String os, String version, File location ->
+    static def install = { String repo, OS.Arch arch, OS.Family os, String version, File location ->
         def params = [
             arch: arch,
             os: os,
@@ -35,6 +33,27 @@ public class LefthookInstallation {
             .map(x -> x.binary)
             .orElseThrow(() -> new RuntimeException("Unable to download lefthook"))
         return result
+    }
+
+    static def findBinary(File location) {
+        def os = OS.getOs(null)
+        def arch = OS.getArch(null)
+        return findBinary(location, os, arch)
+    }
+
+    static def findBinary(File location, OS.Family os, OS.Arch arch) {
+        def binaryPattern = LefthookInstallation.getBinaryName("v?(\\d+\\.\\d+\\.\\d+)", os, arch) + ".*"
+        def binary = null
+        if(location.exists()) {
+            location.listFiles().each { File file ->
+                if (file.name =~ binaryPattern) {
+                    if(binary == null || binary.lastModified() < file.lastModified()) {
+                        binary = file
+                    }
+                }
+            }
+        }
+        return binary
     }
 
     static def download = Loggy.wrap({ x ->
@@ -86,12 +105,12 @@ public class LefthookInstallation {
     }.memoize()
 
     static def os = Loggy.wrap({def x ->
-        x.os = OS.getOs(x.params.os)
+        x.os = x.params.os
         x.os? x: null
     }.memoize())
 
     static def arch = Loggy.wrap({def x ->
-        x.arch = OS.getArch(x.params.arch)
+        x.arch = x.params.arch
         x.arch? x: null
     }.memoize())
 

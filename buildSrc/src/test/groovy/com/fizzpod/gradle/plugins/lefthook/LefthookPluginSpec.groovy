@@ -1,4 +1,4 @@
-/* (C) 2024-2025 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
@@ -14,6 +14,16 @@ class LefthookPluginSpec extends Specification {
     @Rule
     TemporaryFolder temporaryFolder
     
+    def "warmup"() {
+        when:
+        try {
+             ProjectBuilder.builder().withProjectDir(temporaryFolder.getRoot()).build()
+        } catch (Throwable t) {
+            // ignore
+        }
+        then:
+        true
+    }
     
     def "initialise plugin"() {
         setup:
@@ -60,28 +70,47 @@ class LefthookPluginSpec extends Specification {
    
     def "run lefthookHelpTask"() {
         setup:
-        
+            def os = OS.getOs(null)
+            def arch = OS.getArch(null)
+            def binaryName = LefthookInstallation.getBinaryName("v1.0.0", os, arch)
+            def lefthookDir = new File(temporaryFolder.getRoot(), ".lefthook")
+            def binary = new File(lefthookDir, binaryName)
+            binary.createParentDirectories()
+            binary.text = """#!/bin/sh
+                echo "bananas" """
+            binary.setExecutable(true)
+
             Project project = ProjectBuilder.builder().withProjectDir(temporaryFolder.getRoot()).build()
-        when:
-            def plugin = new LefthookPlugin()
-            plugin.apply(project)
-            def task = project.getTasksByName(LefthookHelpTask.NAME, false).iterator().next()
-            task.runTask()
-        then: 
-            !project.getTasksByName(LefthookHelpTask.NAME, false).isEmpty()
+                when:
+                    def plugin = new LefthookPlugin()
+                    plugin.apply(project)
+                    def task = project.getTasksByName(LefthookHelpTask.NAME, false).iterator().next()
+                    task.getLefthookBinary().set(binary)
+                    task.runTask()
+                then:              !project.getTasksByName(LefthookHelpTask.NAME, false).isEmpty()
     }
 
-    def "run lefthookInitTask"() {
+    def "run lefthookInstallTask"() {
         setup:
+            def os = OS.getOs(null)
+            def arch = OS.getArch(null)
+            def binaryName = LefthookInstallation.getBinaryName("v1.0.0", os, arch)
+            def lefthookDir = new File(temporaryFolder.getRoot(), ".lefthook")
+            def binary = new File(lefthookDir, binaryName)
+            binary.createParentDirectories()
+            binary.text = """#!/bin/sh
+                echo "bananas" """
+            binary.setExecutable(true)
         
             Project project = ProjectBuilder.builder().withProjectDir(temporaryFolder.getRoot()).build()
         when:
             def plugin = new LefthookPlugin()
             plugin.apply(project)
-            def task = project.getTasksByName(LefthookInitTask.NAME, false).iterator().next()
+            def task = project.getTasksByName(LefthookInstallTask.NAME, false).iterator().next()
+            task.getLefthookBinary().set(binary)
             task.runTask()
         then: 
-            !project.getTasksByName(LefthookInitTask.NAME, false).isEmpty()
+            !project.getTasksByName(LefthookInstallTask.NAME, false).isEmpty()
     }
 
     def "run lefthookLocalTask"() {
@@ -99,12 +128,17 @@ class LefthookPluginSpec extends Specification {
 
     def "run lefthookRcTask"() {
         setup:
-        
             Project project = ProjectBuilder.builder().withProjectDir(temporaryFolder.getRoot()).build()
+            def lefthookDir = new File(temporaryFolder.getRoot(), ".lefthook")
+            def binary = new File(lefthookDir, "lefthook_v1.0.0_Linux_amd64")
+            binary.createParentDirectories()
+            binary.text = "dummy content"
+            binary.setExecutable(true)
         when:
             def plugin = new LefthookPlugin()
             plugin.apply(project)
             def task = project.getTasksByName(LefthookRcTask.NAME, false).iterator().next()
+            task.setLefthookBinary(binary)
             task.runTask()
         then: 
             !project.getTasksByName(LefthookRcTask.NAME, false).isEmpty()

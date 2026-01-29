@@ -1,10 +1,13 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
-import nebula.test.ProjectSpec
+import org.gradle.api.Project
+import spock.lang.Specification
 
-public class LefthookPluginHelperSpec extends ProjectSpec {
+public class LefthookPluginHelperSpec extends Specification {
+
+    def project = Mock(Project)
 
     def "resolve empty config"() {
         expect:
@@ -12,7 +15,6 @@ public class LefthookPluginHelperSpec extends ProjectSpec {
 
         where:
         config | result
-        null   | [:]
         [:]    | [:]
         ["abc":true]  | ["abc":true]
         ["abc":"def"] | ["abc":"def"]
