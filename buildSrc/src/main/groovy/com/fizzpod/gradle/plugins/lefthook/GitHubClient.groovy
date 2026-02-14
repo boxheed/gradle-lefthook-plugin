@@ -8,6 +8,10 @@ import org.apache.commons.io.FileUtils
 
 public class GitHubClient {
 
+    private static final OkHttpClient okclient = new OkHttpClient()
+            .newBuilder()
+            .build()
+
     static def resolve = { String repo, OS.Arch arch, OS.Family os, String version ->
         def params = [
             arch: arch,
@@ -51,9 +55,6 @@ public class GitHubClient {
 
     static def getRelease = { repo, version ->
  
-        OkHttpClient okclient = new OkHttpClient()
-            .newBuilder()
-            .build()
         MediaType mediaType = MediaType.parse("application/vnd.github+json")
         //TODO allow full URL
         
