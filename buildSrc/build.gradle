@@ -8,7 +8,7 @@ dependencies {
   implementation 'com.jayway.jsonpath:json-path:3.0.0'
   implementation 'org.rauschig:jarchivelib:1.2.0'
   implementation 'com.squareup.okhttp3:okhttp:5.3.2'
-  implementation 'org.yaml:snakeyaml:2.5'
+  implementation 'org.yaml:snakeyaml:2.6'
   
   testImplementation('com.netflix.nebula:nebula-test:11.11.3') 
   testImplementation('org.spockframework:spock-core:2.4-groovy-4.0')
