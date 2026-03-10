@@ -11,9 +11,13 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import org.yaml.snakeyaml.Yaml
 
+@DisableCachingByDefault(because = "Not worth caching")
 public abstract class LefthookYmlTask extends DefaultTask {
 
     public static final String NAME = "lefthookYml"
