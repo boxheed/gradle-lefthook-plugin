@@ -9,14 +9,19 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecOperations
+import org.gradle.work.DisableCachingByDefault
 
+@DisableCachingByDefault(because = "Not worth caching")
 public abstract class LefthookHelpTask extends DefaultTask {
 
     public static final String NAME = "lefthookHelp"
 
     @InputFile
+    @PathSensitive(PathSensitivity.RELATIVE)
     abstract RegularFileProperty getLefthookBinary()
 
     @Inject

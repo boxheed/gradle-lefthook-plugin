@@ -1,4 +1,4 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
@@ -7,6 +7,10 @@ import okhttp3.*
 import org.apache.commons.io.FileUtils
 
 public class GitHubClient {
+
+    private static final OkHttpClient okclient = new OkHttpClient()
+            .newBuilder()
+            .build()
 
     static def resolve = { String repo, OS.Arch arch, OS.Family os, String version ->
         def params = [
@@ -51,9 +55,6 @@ public class GitHubClient {
 
     static def getRelease = { repo, version ->
  
-        OkHttpClient okclient = new OkHttpClient()
-            .newBuilder()
-            .build()
         MediaType mediaType = MediaType.parse("application/vnd.github+json")
         //TODO allow full URL
         
