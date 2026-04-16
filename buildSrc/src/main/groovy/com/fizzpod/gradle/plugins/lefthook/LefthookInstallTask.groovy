@@ -6,6 +6,7 @@ import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
@@ -45,6 +46,9 @@ public abstract class LefthookInstallTask extends DefaultTask {
     abstract ExecOperations getExecOperations()
 
     @Inject
+    abstract ProjectLayout getLayout()
+
+    @Inject
     public LefthookInstallTask(Project project) {
         getGitHooksDir().convention(project.layout.projectDirectory.dir(".git/hooks"))
     }
@@ -67,7 +71,7 @@ public abstract class LefthookInstallTask extends DefaultTask {
         // Execute lefthook install
         getExecOperations().exec { spec ->
             spec.commandLine(binary.absolutePath, "install", "-f")
-            spec.workingDir = project.projectDir
+            spec.workingDir = getLayout().getProjectDirectory().getAsFile()
         }
     }
 }
