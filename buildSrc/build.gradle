@@ -4,7 +4,7 @@ repositories {
 
 dependencies {
 
-  implementation 'commons-io:commons-io:2.21.0'
+  implementation 'commons-io:commons-io:2.22.0'
   implementation 'com.jayway.jsonpath:json-path:3.0.0'
   implementation 'org.rauschig:jarchivelib:1.2.0'
   implementation 'com.squareup.okhttp3:okhttp:5.3.2'
