@@ -24,8 +24,6 @@ public abstract class LefthookDownloadTask extends DefaultTask {
 
     public static final String NAME = "lefthookDownload"
 
-    private Project project
-
     @Optional
     @OutputFile
     abstract RegularFileProperty getLefthookBinary()
@@ -47,7 +45,6 @@ public abstract class LefthookDownloadTask extends DefaultTask {
 
     @Inject
     public LefthookDownloadTask(Project project) {
-        this.project = project
         def providers = project.getProviders()
         def extension = project.extensions.getByType(LefthookPluginExtension)
         getLefthookVersion().convention(extension.getVersion())

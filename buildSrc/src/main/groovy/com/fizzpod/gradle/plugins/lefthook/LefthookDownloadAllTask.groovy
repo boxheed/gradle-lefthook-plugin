@@ -31,8 +31,6 @@ public abstract class LefthookDownloadAllTask extends DefaultTask {
         [OS.Family.WINDOWS.id, OS.Arch.AMD64.id]
     ]
 
-    private Project project
-
     @Input
     abstract Property<String> getLefthookVersion()
 
@@ -45,8 +43,6 @@ public abstract class LefthookDownloadAllTask extends DefaultTask {
 
     @Inject
     public LefthookDownloadAllTask(Project project) {
-        this.project = project
-        this.project = project
         def providers = project.getProviders()
         def extension = project.extensions.getByType(LefthookPluginExtension)
         getLefthookVersion().convention(extension.getVersion())
