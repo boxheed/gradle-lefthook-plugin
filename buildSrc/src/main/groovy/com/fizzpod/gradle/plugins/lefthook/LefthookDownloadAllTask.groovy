@@ -11,6 +11,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
@@ -32,8 +33,9 @@ public abstract class LefthookDownloadAllTask extends DefaultTask {
         [OS.Family.WINDOWS.id, OS.Arch.AMD64.id]
     ]
 
-    @Input
-    abstract Property<String> getLefthookVersion()
+    @InputFile
+    @PathSensitive(PathSensitivity.NONE)
+    abstract RegularFileProperty getResolvedVersionFile()
 
     @Input
     abstract Property<String> getLefthookRepository()
@@ -46,7 +48,6 @@ public abstract class LefthookDownloadAllTask extends DefaultTask {
     public LefthookDownloadAllTask(Project project) {
         def providers = project.getProviders()
         def extension = project.extensions.getByType(LefthookPluginExtension)
-        getLefthookVersion().convention(extension.getVersion())
         getLefthookRepository().convention(extension.getRepository())
         getLefthookLocation().convention(extension.getLocation())
     }
@@ -55,26 +56,30 @@ public abstract class LefthookDownloadAllTask extends DefaultTask {
         project.getLogger().info("Registering task {}", NAME)
         def taskContainer = project.getTasks()
 
-        taskContainer.create([name: NAME,
+        return taskContainer.create([
+            name: NAME,
             type: LefthookDownloadAllTask,
             dependsOn: [],
             group: LefthookPlugin.GROUP,
-            description: 'Download and install all lefthook binaries'])
+            description: 'Download and install all lefthook binaries'
+        ])
     }
 
     @TaskAction
     def runTask() {
-
-        for(def osArch: osArches) {
+        def version = getResolvedVersionFile().getAsFile().get().text.trim()
+        for (def osArch : osArches) {
             def context = [:]
-            context.version = getLefthookVersion().get()
+            context.version = version
             context.repo = getLefthookRepository().get()
             context.location = getLefthookLocation().getAsFile().get()
-            
+
             context.os = OS.getOs(osArch[0])
             context.arch = OS.getArch(osArch[1])
-            
-            Loggy.lifecycle("Installing {} : {}", context.os, context.arch)
+            context.binary =
+                    LefthookInstallation.binary(context.location, context.version, context.os, context.arch)
+
+            Loggy.lifecycle("Installing {} : {} at {}", context.os, context.arch, context.binary)
             LefthookDownloadTask.run(context)
         }
     }

@@ -60,10 +60,10 @@ public abstract class LefthookInstallTask extends DefaultTask {
 
         return taskContainer.create([name: NAME,
             type: LefthookInstallTask,
-            dependsOn: [LefthookBinaryTask.NAME, LefthookRcTask.NAME, LefthookLocalTask.NAME, LefthookYmlTask.NAME],
+            dependsOn: [LefthookRcTask.NAME, LefthookLocalTask.NAME, LefthookYmlTask.NAME],
             group: LefthookPlugin.GROUP,
-            description: 'Installs lefthook hooks'])
-    }
+            description: 'Installs the lefthook hooks into the git repository'])
+        }
 
     @TaskAction
     def runTask() {

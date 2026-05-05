@@ -64,7 +64,7 @@ public abstract class LefthookYmlTask extends DefaultTask {
 
         return taskContainer.create([name: NAME,
             type: LefthookYmlTask,
-            dependsOn: [LefthookBinaryTask.NAME, LefthookRcTask.NAME],
+            dependsOn: [LefthookRcTask.NAME],
             group: LefthookPlugin.GROUP,
             description: 'Creates the lefthook.yml file'])
     }

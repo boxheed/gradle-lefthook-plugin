@@ -58,10 +58,10 @@ public abstract class LefthookRcTask extends DefaultTask {
 
         return taskContainer.create([name: NAME,
             type: LefthookRcTask,
-            dependsOn: [LefthookBinaryTask.NAME],
+            dependsOn: [],
             group: LefthookPlugin.GROUP,
-            description: 'Creates the lefthookrc file'])
-    }
+            description: 'Creates the .lefthookrc file'])
+        }
 
     @TaskAction
     def runTask() {
