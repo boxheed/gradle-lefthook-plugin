@@ -39,7 +39,7 @@ public abstract class LefthookVersionTask extends DefaultTask {
 
         return taskContainer.create([name: NAME,
             type: LefthookVersionTask,
-            dependsOn: [LefthookBinaryTask.NAME],
+            dependsOn: [],
             group: LefthookPlugin.GROUP,
             description: 'Outputs the current lefthook version'])
     }

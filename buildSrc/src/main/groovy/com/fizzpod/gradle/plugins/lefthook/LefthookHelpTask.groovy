@@ -37,10 +37,10 @@ public abstract class LefthookHelpTask extends DefaultTask {
 
         return taskContainer.create([name: NAME,
             type: LefthookHelpTask,
-            dependsOn: [LefthookBinaryTask.NAME],
+            dependsOn: [],
             group: LefthookPlugin.GROUP,
-            description: 'Outputs the current lefthook help'])
-    }
+            description: 'Outputs the lefthook help'])
+        }
 
     @TaskAction
     def runTask() {

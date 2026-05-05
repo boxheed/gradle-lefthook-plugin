@@ -3,11 +3,7 @@
 package com.fizzpod.gradle.plugins.lefthook
 
 import groovy.json.*
-import javax.inject.Inject
 import org.apache.commons.io.FileUtils
-import org.apache.commons.lang3.SystemUtils
-import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.TaskAction
 import org.rauschig.jarchivelib.ArchiveFormat
 import org.rauschig.jarchivelib.ArchiverFactory
 import org.rauschig.jarchivelib.CompressionType
@@ -34,27 +30,6 @@ public class LefthookInstallation {
         return result
     }
 
-    static def findBinary(File location) {
-        def os = OS.getOs(null)
-        def arch = OS.getArch(null)
-        return findBinary(location, os, arch)
-    }
-
-    static def findBinary(File location, OS.Family os, OS.Arch arch) {
-        def binaryPattern = LefthookInstallation.getBinaryName("v?(\\d+\\.\\d+\\.\\d+)", os, arch) + ".*"
-        def binary = null
-        if(location.exists()) {
-            location.listFiles().each { File file ->
-                if (file.name =~ binaryPattern) {
-                    if(binary == null || binary.lastModified() < file.lastModified()) {
-                        binary = file
-                    }
-                }
-            }
-        }
-        return binary
-    }
-
     static def download = Loggy.wrap({ x ->
         if(!x.binary.exists()) {
             LefthookInstallation.downloadAndInstall(x.url, x.binary, x.os)
@@ -64,9 +39,30 @@ public class LefthookInstallation {
         return x.binary.exists()? x: null
     })
 
-    static def downloadAndInstall = { url, binary , os ->
-        def tmp = new File(binary.getParentFile(), binary.getName())
+    static def downloadAndInstall = { url, binary, os ->
+        def tmp = File.createTempFile("lefthook", ".download")
+        tmp.deleteOnExit()
         FileUtils.copyURLToFile(new URL(url), tmp, 120000, 120000)
+        if (url.endsWith(".gz")) {
+            def archiver = ArchiverFactory.createArchiver(CompressionType.GZIP)
+            archiver.extract(tmp, binary.getParentFile())
+        } else if (url.endsWith(".zip")) {
+            def archiver = ArchiverFactory.createArchiver(ArchiveFormat.ZIP)
+            archiver.extract(tmp, binary.getParentFile())
+            // Zip might contain lefthook.exe, rename to versioned name
+            def exe = new File(binary.getParentFile(), "lefthook.exe")
+            if (exe.exists()) {
+                if (binary.exists()) {
+                    binary.delete()
+                }
+                FileUtils.moveFile(exe, binary)
+            }
+        } else {
+            if (binary.exists()) {
+                binary.delete()
+            }
+            FileUtils.moveFile(tmp, binary)
+        }
         binary.setExecutable(true)
         return binary
     }
