@@ -5,10 +5,12 @@ package com.fizzpod.gradle.plugins.lefthook
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
@@ -25,13 +27,22 @@ public abstract class LefthookYmlTask extends DefaultTask {
     @Internal
     abstract MapProperty<String, Object> getConfig()
 
+    @InputDirectory
+    @PathSensitive(PathSensitivity.RELATIVE)
+    abstract DirectoryProperty getLefthookLocation()
+
     @Input
     Provider<String> getResolvedConfigContent() {
         return getConfig().map { config -> 
-             // Resolve the configuration (handle closures etc.)
-             def resolved = LefthookPluginHelper.resolve(project, [], config)
-             Yaml yaml = new Yaml()
-             return yaml.dump(resolved)
+            //TODO is this resolving too early? Should we resolve the configuration in the task?
+            // Resolve the configuration (handle closures etc.)
+            File location = getLefthookLocation().getAsFile().get()
+            if(location == null) {
+                throw new RuntimeException("Lefthook location is not set")
+            }
+            def resolved = LefthookPluginHelper.resolve(location, [], config)
+            Yaml yaml = new Yaml()
+            return yaml.dump(resolved)
         }
     }
 
@@ -40,7 +51,9 @@ public abstract class LefthookYmlTask extends DefaultTask {
 
     @Inject
     public LefthookYmlTask(Project project) {
+        def extension = project.extensions.getByType(LefthookPluginExtension)
         getConfig().convention([:])
+        getLefthookLocation().convention(extension.getLocation())
         getLefthookConfigFile().convention(project.layout.projectDirectory.file("lefthook.yml"))
     }
 
@@ -50,7 +63,7 @@ public abstract class LefthookYmlTask extends DefaultTask {
 
         return taskContainer.create([name: NAME,
             type: LefthookYmlTask,
-            dependsOn: [],
+            dependsOn: [LefthookBinaryTask.NAME, LefthookRcTask.NAME],
             group: LefthookPlugin.GROUP,
             description: 'Creates the lefthook.yml file'])
     }

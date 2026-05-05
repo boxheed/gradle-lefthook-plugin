@@ -2,16 +2,18 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
-import org.gradle.api.Project
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 public class LefthookPluginHelperSpec extends Specification {
 
-    def project = Mock(Project)
+    @Rule
+    TemporaryFolder temporaryFolder
 
     def "resolve empty config"() {
         expect:
-        LefthookPluginHelper.resolve(project, [], config) == result 
+        LefthookPluginHelper.resolve(temporaryFolder.getRoot(), [], config) == result 
 
         where:
         config | result

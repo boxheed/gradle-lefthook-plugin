@@ -7,7 +7,6 @@ import javax.inject.Inject
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.SystemUtils
 import org.gradle.api.DefaultTask
-import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 import org.rauschig.jarchivelib.ArchiveFormat
 import org.rauschig.jarchivelib.ArchiverFactory

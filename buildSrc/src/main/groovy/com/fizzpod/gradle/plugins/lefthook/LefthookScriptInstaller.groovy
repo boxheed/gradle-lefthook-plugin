@@ -3,16 +3,15 @@
 package com.fizzpod.gradle.plugins.lefthook
 
 import org.apache.commons.io.FileUtils
-import org.gradle.api.Project
 
 public class LefthookScriptInstaller {
 
-    private Project project
     private List<String> stack
+    private File lefthookLocation
 
-    public LefthookScriptInstaller(Project project, List<String> stack) {
-        this.project = project
+    public LefthookScriptInstaller(File lefthookLocation, List<String> stack) {
         this.stack = stack
+        this.lefthookLocation = lefthookLocation
     }
 
     def install(def resource) {
@@ -20,7 +19,12 @@ public class LefthookScriptInstaller {
         if(resource instanceof Closure) {
             res = resource.call()
         }
-        def context = LefthookPluginHelper.createContext(this.project)
+        def context = [:]
+        context.location = this.lefthookLocation
+        if(this.lefthookLocation == null) {
+            throw new RuntimeException("Lefthook location is not set")
+        }
+        //.getAsFile().get()
         context.resource = res
         context.stack = this.stack
         return LefthookScriptInstaller.doInstall(context)
@@ -111,13 +115,9 @@ public class LefthookScriptInstaller {
 
         config[hookName] = ["runner":"bash"]
         return hookName
-      //  return x
     })
 
     static def location = Loggy.wrap({ x ->
-        def projectDir = x.project.rootDir
-        def lefthookDir = x.extension.location
-        x.location = lefthookDir.getAsFile().get()
         return x.location? x: null
     })
 
