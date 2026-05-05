@@ -35,6 +35,8 @@ class LefthookPluginSpec extends Specification {
         then: 
             project.getTasksByName(LefthookDownloadTask.NAME, false) != null
             !project.getTasksByName(LefthookDownloadTask.NAME, false).isEmpty()
+            project.getTasksByName(LefthookResolveVersionTask.NAME, false) != null
+            !project.getTasksByName(LefthookResolveVersionTask.NAME, false).isEmpty()
             project.getExtensions().findByName(LefthookPlugin.NAME) != null
     }
 

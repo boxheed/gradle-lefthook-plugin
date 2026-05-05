@@ -42,19 +42,23 @@ public abstract class LefthookDownloadTask extends DefaultTask {
         getLefthookLocation().convention(extension.getLocation())
 
         getLefthookBinary()
-            .set(getResolvedVersionFile()
-                .zip(getLefthookLocation(),
-                    { versionFile, location ->
-                        def version = versionFile.asFile.text.trim()
-                        def os = OS.getOs(null)
-                        def arch = OS.getArch(null)
-                        def name =
-                                LefthookInstallation.getBinaryName(
-                                        version, os, arch)
-                        return location.file(name)
-                    }
-                )
-            )
+                .set(
+                        getResolvedVersionFile()
+                                .zip(
+                                        getLefthookLocation(),
+                                        { versionFile, location ->
+                                            def file = versionFile.asFile
+                                            def version =
+                                                    file.exists()
+                                                            ? file.text.trim()
+                                                            : extension.getVersion().get()
+                                            def os = OS.getOs(null)
+                                            def arch = OS.getArch(null)
+                                            def name =
+                                                    LefthookInstallation.getBinaryName(
+                                                            version, os, arch)
+                                            return location.file(name)
+                                        }))
     }
 
     static register(Project project) {
