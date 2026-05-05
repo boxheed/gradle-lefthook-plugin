@@ -4,6 +4,7 @@ package com.fizzpod.gradle.plugins.lefthook
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.SourceSet
@@ -13,36 +14,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class LefthookPluginHelper {
-
-    
-    static def createContext = Loggy.wrap( {Project project ->
-        def context = [:]
-        context.project = project
-        context.projectDir = project.projectDir
-        context.rootDir = project.rootDir
-       // context.options = LefthookPluginHelper.getOptions(project)
-        context.extension = getExtension(project)
-        
-        //context.config = LefthookPluginHelper.getConfig(project)
-        return context
-    })
-    
-    static def getConfig = Loggy.wrap( {Project project ->
-        Loggy.debug("Finding config")
-        def extension = getExtension(project)
-        def config = extension != null? extension.config: [:]
-        config = config["config"] != null? config["config"]: [:] 
-        if(config instanceof Closure) {
-            config = config.call()
-        }
-        Loggy.debug("Lefthook Config {}", config)
-        return config
-    })
-
-    static getExtension(Project project) {
-        def extension = project[LefthookPlugin.NAME]
-        return extension
-    }
 
     static merge(Map lhs, Map rhs) {
         return rhs.inject(lhs.clone()) { map, entry ->
@@ -57,19 +28,20 @@ class LefthookPluginHelper {
         }
     }
 
-    static def resolve = {Project project, List stack, Map source ->
+    static def resolve = {File lefthookLocation, List stack, Map source ->
+        
         Loggy.debug("resolve {}, {}", stack, source)
         def result = source.inject([:]) { map, key, value ->
             Loggy.debug("inject {}, {}, {}", map, key, value)
             if(key instanceof Closure) {
-                def installer = new LefthookScriptInstaller(project, stack)
+                def installer = new LefthookScriptInstaller(lefthookLocation, stack)
                 key.delegate = installer
                 key.resolveStrategy = Closure.DELEGATE_FIRST
                 key = key.call()
                 Loggy.debug("key closure resolved to {}", key)
             }
             if(value instanceof Closure) {
-                def installer = new LefthookScriptInstaller(project, stack)
+                def installer = new LefthookScriptInstaller(lefthookLocation, stack)
                 value.delegate = installer
                 value.resolveStrategy = Closure.DELEGATE_FIRST
                 value = value.call()
@@ -79,7 +51,7 @@ class LefthookPluginHelper {
             Loggy.debug("Stack {}", localStack)
             if (value instanceof Map) {
                 Loggy.debug("value {} is map, resolving", value)
-                def resolvedValue = LefthookPluginHelper.resolve(project, localStack, value)
+                def resolvedValue = LefthookPluginHelper.resolve(lefthookLocation, localStack, value)
                 Loggy.debug("value {} resolved to {}, assigning to {}", value, resolvedValue, key)
                 map[key] = resolvedValue
                 Loggy.debug("value {} is map, resolving", value)
