@@ -37,29 +37,24 @@ public abstract class LefthookDownloadTask extends DefaultTask {
 
     @Inject
     public LefthookDownloadTask(Project project) {
-        def providers = project.getProviders()
         def extension = project.extensions.getByType(LefthookPluginExtension)
         getLefthookRepository().convention(extension.getRepository())
         getLefthookLocation().convention(extension.getLocation())
 
         getLefthookBinary()
-                .set(
-                        getResolvedVersionFile()
-                                .flatMap({ versionFile ->
-                                    providers.fileContents(versionFile).getAsText()
-                                })
-                                .flatMap({ version ->
-                                    extension
-                                            .getLocation()
-                                            .map({ location ->
-                                                def os = OS.getOs(null)
-                                                def arch = OS.getArch(null)
-                                                def name =
-                                                        LefthookInstallation.getBinaryName(
-                                                                version, os, arch)
-                                                return location.file(name)
-                                            })
-                                }))
+            .set(getResolvedVersionFile()
+                .zip(getLefthookLocation(),
+                    { versionFile, location ->
+                        def version = versionFile.asFile.text.trim()
+                        def os = OS.getOs(null)
+                        def arch = OS.getArch(null)
+                        def name =
+                                LefthookInstallation.getBinaryName(
+                                        version, os, arch)
+                        return location.file(name)
+                    }
+                )
+            )
     }
 
     static register(Project project) {

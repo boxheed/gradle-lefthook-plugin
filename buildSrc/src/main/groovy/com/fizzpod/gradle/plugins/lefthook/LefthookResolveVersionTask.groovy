@@ -5,10 +5,12 @@ package com.fizzpod.gradle.plugins.lefthook
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
@@ -26,6 +28,9 @@ public abstract class LefthookResolveVersionTask extends DefaultTask {
     @Input
     abstract Property<Long> getTtl()
 
+    @OutputDirectory
+    abstract DirectoryProperty getVersionLocation()
+
     @OutputFile
     abstract RegularFileProperty getResolvedVersionFile()
 
@@ -35,8 +40,8 @@ public abstract class LefthookResolveVersionTask extends DefaultTask {
         getLefthookVersion().convention(extension.getVersion())
         getLefthookRepository().convention(extension.getRepository())
         getTtl().convention(86400000) // 1 day
-        getResolvedVersionFile()
-                .convention(project.getLayout().getBuildDirectory().file("lefthook/version.txt"))
+        getVersionLocation().convention(extension.getLocation())
+        getResolvedVersionFile().convention(getVersionLocation().file("version.txt"))
     }
 
     static register(Project project) {
