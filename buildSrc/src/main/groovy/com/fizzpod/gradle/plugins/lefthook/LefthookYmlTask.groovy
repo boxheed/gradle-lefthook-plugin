@@ -19,7 +19,6 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
 import org.yaml.snakeyaml.Yaml
 
-@DisableCachingByDefault(because = "Not worth caching")
 public abstract class LefthookYmlTask extends DefaultTask {
 
     public static final String NAME = "lefthookYml"

@@ -17,7 +17,6 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecOperations
 import org.gradle.work.DisableCachingByDefault
 
-@DisableCachingByDefault(because = "Not worth caching")
 public abstract class LefthookBinaryTask extends DefaultTask {
 
     public static final String NAME = "lefthookBinary"
