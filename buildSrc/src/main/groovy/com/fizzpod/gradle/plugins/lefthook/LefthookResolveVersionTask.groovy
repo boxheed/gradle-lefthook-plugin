@@ -13,8 +13,9 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 
-@CacheableTask
+@DisableCachingByDefault(because = "Contains internal TTL logic for version resolution")
 public abstract class LefthookResolveVersionTask extends DefaultTask {
 
     public static final String NAME = "lefthookResolveVersion"
