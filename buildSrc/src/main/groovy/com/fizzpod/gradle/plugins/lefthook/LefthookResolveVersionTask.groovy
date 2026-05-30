@@ -61,16 +61,23 @@ public abstract class LefthookResolveVersionTask extends DefaultTask {
     def runTask() {
         File versionFile = getResolvedVersionFile().get().asFile
         long ttl = getTtl().get()
+        String version = getLefthookVersion().get()
 
-        if (versionFile.exists() && (System.currentTimeMillis() - versionFile.lastModified() < ttl)) {
-            logger.info(
-                    "Resolved version file is within TTL, skipping GitHub query. Using version {}",
-                    versionFile.text)
-            return
+        boolean isLatest = version.equalsIgnoreCase("latest")
+        if (versionFile.exists()) {
+            String cachedVersion = versionFile.text.trim()
+            boolean matchesConfigured = !isLatest && cachedVersion.equalsIgnoreCase(version)
+            boolean withinTtl = (System.currentTimeMillis() - versionFile.lastModified() < ttl)
+
+            if (matchesConfigured || (isLatest && withinTtl)) {
+                logger.info(
+                        "Resolved version file is within TTL or matches configured version, skipping resolution. Using version {}",
+                        cachedVersion)
+                return
+            }
         }
 
-        String version = getLefthookVersion().get()
-        if (version.equalsIgnoreCase("latest")) {
+        if (isLatest) {
             logger.lifecycle("Querying GitHub for the latest lefthook version.")
             def artifact =
                     LefthookInstallation.resolveArtifact(

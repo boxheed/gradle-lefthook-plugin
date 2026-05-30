@@ -56,7 +56,7 @@ class LefthookResolveVersionTaskSpec extends Specification {
 
     def "run task uses cached version within TTL"() {
         setup:
-            task.getLefthookVersion().set("1.6.0")
+            task.getLefthookVersion().set("latest")
             File versionFile = task.getResolvedVersionFile().get().asFile
             versionFile.parentFile.mkdirs()
             versionFile.text = "old-version"
@@ -67,9 +67,35 @@ class LefthookResolveVersionTaskSpec extends Specification {
             versionFile.text == "old-version"
     }
 
+    def "run task bypasses cache if fixed version differs from cached version"() {
+        setup:
+            task.getLefthookVersion().set("1.6.0")
+            File versionFile = task.getResolvedVersionFile().get().asFile
+            versionFile.parentFile.mkdirs()
+            versionFile.text = "old-version"
+            // File is fresh (within TTL) but the configured version is different
+        when:
+            task.runTask()
+        then:
+            versionFile.text == "1.6.0"
+    }
+
+    def "run task uses cached version matching configured version"() {
+        setup:
+            task.getLefthookVersion().set("1.6.0")
+            File versionFile = task.getResolvedVersionFile().get().asFile
+            versionFile.parentFile.mkdirs()
+            versionFile.text = "1.6.0"
+            versionFile.setLastModified(System.currentTimeMillis() - 1000L)
+        when:
+            task.runTask()
+        then:
+            versionFile.text == "1.6.0"
+    }
+
     def "run task refreshes version after TTL expires"() {
         setup:
-            task.getLefthookVersion().set("1.7.0")
+            task.getLefthookVersion().set("latest")
             File versionFile = task.getResolvedVersionFile().get().asFile
             versionFile.parentFile.mkdirs()
             versionFile.text = "old-version"
@@ -77,7 +103,8 @@ class LefthookResolveVersionTaskSpec extends Specification {
         when:
             task.runTask()
         then:
-            versionFile.text == "1.7.0"
+            versionFile.text != "old-version"
+            versionFile.text.length() > 0
     }
 
 }
