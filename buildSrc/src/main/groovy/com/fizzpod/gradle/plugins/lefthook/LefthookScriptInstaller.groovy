@@ -80,9 +80,9 @@ public class LefthookScriptInstaller {
                     output << input
                 }
             }
-            Loggy.info("File extracted successfully from classpath to ${file.absolutePath}")
+            Loggy.info(LefthookScriptInstaller, "File extracted successfully from classpath to ${file.absolutePath}")
         } catch (IOException e) {
-            Loggy.error("Error extracting file from classpath: ${e.message}")
+            Loggy.error(LefthookScriptInstaller, "Error extracting file from classpath: ${e.message}")
             throw e
         }
     }

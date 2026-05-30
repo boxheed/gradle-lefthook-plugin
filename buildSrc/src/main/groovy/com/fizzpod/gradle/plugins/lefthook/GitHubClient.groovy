@@ -36,7 +36,7 @@ public class GitHubClient {
 
     static def getUrl = { release, os, arch ->
         def asset = release.assets.find {
-            Loggy.debug(it.name)
+            Loggy.debug(GitHubClient, it.name)
             it.name.contains(os.id) && it.name.contains(arch.id)
         }
         return asset?.browser_download_url
@@ -44,7 +44,7 @@ public class GitHubClient {
 
     static def version = { x ->
         x.version = x.release.tag_name
-        Loggy.debug(x.version)
+        Loggy.debug(GitHubClient, x.version)
         x.version? x: null
     }
 
@@ -70,7 +70,7 @@ public class GitHubClient {
         def result = null
         try(def response = okclient.newCall(request).execute()) {
             String content = response.body().string()
-            Loggy.debug(content)
+            Loggy.debug(GitHubClient, content)
             def code = response.code
             def jsonSlurper = new JsonSlurper()
             result = jsonSlurper.parseText(content)

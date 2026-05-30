@@ -66,14 +66,15 @@ public class LefthookPlugin implements Plugin<Project> {
         project.afterEvaluate { proj ->
             def autoInstall = extension.getAutoInstall().get()
             def autoTaskName = extension.getAutoTaskName().get()
-            Loggy.debug("Auto installing lefthook: {}", autoInstall)
+            Loggy.debug(LefthookPlugin, "Auto installing lefthook: {}", autoInstall)
             if (autoInstall) {
-                Loggy.lifecycle("Auto installing lefthook")
+                Loggy.lifecycle(LefthookPlugin, "Auto installing lefthook")
                 def autoTask = proj.tasks.findByName(autoTaskName)
                 if (autoTask != null) {
                     autoTask.dependsOn installTask
                 } else {
                     Loggy.warn(
+                            LefthookPlugin,
                             "Lefthook auto install requested, but '{}' task not found. Please ensure the 'check' task exists or manually call 'lefthookInstall'.",
                             autoTaskName)
                 }
