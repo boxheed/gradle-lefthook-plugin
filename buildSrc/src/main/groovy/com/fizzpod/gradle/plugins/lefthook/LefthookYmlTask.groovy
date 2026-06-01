@@ -74,6 +74,7 @@ public abstract class LefthookYmlTask extends DefaultTask {
         def content = getResolvedConfigContent().get()
         def configFile = getLefthookConfigFile().getAsFile().get()
         
+        logger.info("Creating Lefthook configuration (lefthook.yml) at {}", configFile.absolutePath)
         if (content != null && !content.isEmpty()) {
             configFile.withWriter { writer ->
                 writer.write(content)

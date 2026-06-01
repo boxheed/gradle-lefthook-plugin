@@ -79,7 +79,7 @@ public abstract class LefthookDownloadAllTask extends DefaultTask {
             context.binary =
                     LefthookInstallation.binary(context.location, context.version, context.os, context.arch)
 
-            Loggy.lifecycle("Installing {} : {} at {}", context.os, context.arch, context.binary)
+            Loggy.lifecycle(LefthookDownloadAllTask, "Installing {} : {} at {}", context.os, context.arch, context.binary)
             LefthookDownloadTask.run(context)
         }
     }

@@ -68,9 +68,10 @@ public abstract class LefthookRcTask extends DefaultTask {
         def binary = getLefthookBinary().getAsFile().get()
         def rcFile = getLefthookRcFile().getAsFile().get()
         def rcConfig = getRcConfiguration().get()
-        println("Left ${binary.getAbsolutePath()}")
+        logger.info("Creating Lefthook environment shell wrapper (.lefthookrc) at {}", rcFile.absolutePath)
+        logger.debug("Writing LEFTHOOK_BIN={} and custom rc config", binary.absolutePath)
         rcFile.withWriter { writer ->
-            writer.writeLine "export LEFTHOOK_BIN=${binary.getAbsolutePath()}"
+            writer.writeLine "export LEFTHOOK_BIN=${binary.absolutePath}"
             writer.writeLine rcConfig
         }
     }
