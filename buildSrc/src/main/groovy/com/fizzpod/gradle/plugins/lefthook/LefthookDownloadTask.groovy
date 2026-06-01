@@ -85,7 +85,10 @@ public abstract class LefthookDownloadTask extends DefaultTask {
         context.binary = getLefthookBinary().get().asFile
 
         if (!context.binary.exists()) {
+            logger.lifecycle("Downloading Lefthook {} binary from {}...", context.version, context.repo)
             LefthookDownloadTask.run(context)
+        } else {
+            logger.info("Lefthook binary already exists at: {}", context.binary.absolutePath)
         }
     }
 

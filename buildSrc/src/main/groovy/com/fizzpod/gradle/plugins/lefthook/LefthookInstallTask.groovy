@@ -69,10 +69,12 @@ public abstract class LefthookInstallTask extends DefaultTask {
     def runTask() {
         def binary = getLefthookBinary().getAsFile().get()
         
+        logger.lifecycle("Installing Lefthook Git hooks...")
         // Execute lefthook install
         getExecOperations().exec { spec ->
             spec.commandLine(binary.absolutePath, "install", "-f")
             spec.workingDir = getLayout().getProjectDirectory().getAsFile()
         }
+        logger.lifecycle("Lefthook Git hooks successfully installed!")
     }
 }

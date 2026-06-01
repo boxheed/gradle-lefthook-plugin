@@ -48,6 +48,7 @@ public abstract class LefthookLocalTask extends DefaultTask {
         def rcFile = getLefthookRcFile().getAsFile().get()
         def localFile = getLefthookLocalFile().getAsFile().get()
         
+        logger.info("Creating Lefthook local configuration (lefthook-local.yml) at {}", localFile.absolutePath)
         localFile.withWriter { writer ->
             writer.writeLine "rc: ${rcFile.absolutePath}"
         }
