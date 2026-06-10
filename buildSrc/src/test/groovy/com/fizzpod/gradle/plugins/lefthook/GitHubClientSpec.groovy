@@ -13,15 +13,15 @@ class GitHubClientSpec extends Specification {
     private Request capturedRequest
 
     def setup() {
-        originalClient = GitHubClient.okclient
+        originalClient = HttpClientProvider.getClient()
         mockClient = Mock(Call.Factory)
         mockCall = Mock(Call)
 
-        GitHubClient.okclient = mockClient
+        HttpClientProvider.setClient(mockClient)
     }
 
     def cleanup() {
-        GitHubClient.okclient = originalClient
+        HttpClientProvider.setClient(originalClient)
     }
 
     private Response createFakeResponse(int code, String jsonContent) {

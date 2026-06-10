@@ -42,7 +42,7 @@ public class LefthookInstallation {
     static def downloadAndInstall = { url, binary, os ->
         def tmp = File.createTempFile("lefthook", ".download")
         tmp.deleteOnExit()
-        FileUtils.copyURLToFile(new URL(url), tmp, 120000, 120000)
+        HttpClientProvider.downloadToFile(url, tmp)
         if (url.endsWith(".gz")) {
             def archiver = ArchiverFactory.createArchiver(CompressionType.GZIP)
             archiver.extract(tmp, binary.getParentFile())

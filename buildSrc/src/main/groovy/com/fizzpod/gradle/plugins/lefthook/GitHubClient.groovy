@@ -4,13 +4,8 @@ package com.fizzpod.gradle.plugins.lefthook
 
 import groovy.json.*
 import okhttp3.*
-import org.apache.commons.io.FileUtils
 
 public class GitHubClient {
-
-    public static okhttp3.Call.Factory okclient = new OkHttpClient()
-            .newBuilder()
-            .build()
 
     static def resolve = { String repo, OS.Arch arch, OS.Family os, String version, String token ->
         def params = [
@@ -74,7 +69,7 @@ public class GitHubClient {
 
         Request request = requestBuilder.build()
         def result = null
-        try(def response = okclient.newCall(request).execute()) {
+        try(def response = HttpClientProvider.getClient().newCall(request).execute()) {
             String content = response.body().string()
             Loggy.debug(GitHubClient, content)
             def code = response.code
