@@ -91,11 +91,11 @@ public class LefthookInstallation {
     }.memoize()
 
     static def artifact = Loggy.wrap({ x ->
-        x = x + LefthookInstallation.resolveArtifact(x.params.repo, x.arch, x.os, x.params.version)
+        x = x + LefthookInstallation.resolveArtifact(x.params.repo, x.arch, x.os, x.params.version, x.params.token)
     })
 
-    static def resolveArtifact = { String repo, OS.Arch arch, OS.Family os, String version ->
-        def artifact = GitHubClient.resolve(repo, arch, os, version)
+    static def resolveArtifact = { String repo, OS.Arch arch, OS.Family os, String version, String token ->
+        def artifact = GitHubClient.resolve(repo, arch, os, version, token)
         return [url: artifact.url, version: artifact.version]
     }.memoize()
 
