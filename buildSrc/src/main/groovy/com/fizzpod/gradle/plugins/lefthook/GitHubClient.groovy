@@ -7,6 +7,8 @@ import okhttp3.*
 
 public class GitHubClient {
 
+    private static final JsonSlurper JSON_SLURPER = new JsonSlurper()
+
     static def resolve = { String repo, OS.Arch arch, OS.Family os, String version, String token ->
         def params = [
             arch: arch,
@@ -73,8 +75,7 @@ public class GitHubClient {
             String content = response.body().string()
             Loggy.debug(GitHubClient, content)
             def code = response.code
-            def jsonSlurper = new JsonSlurper()
-            result = jsonSlurper.parseText(content)
+            result = JSON_SLURPER.parseText(content)
             if(code != 200)  {
                 throw new IOException("Could not find release ${version} on repository ${repo}. status: ${code}")
             }
