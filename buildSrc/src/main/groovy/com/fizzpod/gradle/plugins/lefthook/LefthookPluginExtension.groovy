@@ -23,6 +23,7 @@ public abstract class LefthookPluginExtension implements GroovyInterceptable {
     abstract DirectoryProperty getLocation()
     abstract Property<String> getRepository()
     abstract Property<String> getRc()
+    abstract Property<String> getGithubToken()
 
     @Inject
     public LefthookPluginExtension(ObjectFactory objects) {
@@ -34,5 +35,8 @@ public abstract class LefthookPluginExtension implements GroovyInterceptable {
         getLocation().convention(getProject().layout.projectDirectory.dir(".lefthook"))
         getRepository().convention("evilmartians/lefthook")
         getRc().convention("")
+        getGithubToken().convention(getProject().getProviders().environmentVariable("GITHUB_TOKEN")
+            .orElse(getProject().getProviders().environmentVariable("LEFTHOOK_GITHUB_TOKEN"))
+            .orElse(""))
     }
 }

@@ -4,20 +4,18 @@ package com.fizzpod.gradle.plugins.lefthook
 
 import groovy.json.*
 import okhttp3.*
-import org.apache.commons.io.FileUtils
 
 public class GitHubClient {
 
-    private static final OkHttpClient okclient = new OkHttpClient()
-            .newBuilder()
-            .build()
+    private static final JsonSlurper JSON_SLURPER = new JsonSlurper()
 
-    static def resolve = { String repo, OS.Arch arch, OS.Family os, String version ->
+    static def resolve = { String repo, OS.Arch arch, OS.Family os, String version, String token ->
         def params = [
             arch: arch,
             os: os,
             version: version,
-            repo: repo
+            repo: repo,
+            token: token
         ]
         def context = [params: params]
         def result = Optional.ofNullable(context)
@@ -49,11 +47,11 @@ public class GitHubClient {
     }
 
     static def release = { x ->
-        x.release = GitHubClient.getRelease(x.params.repo, x.params.version)
+        x.release = GitHubClient.getRelease(x.params.repo, x.params.version, x.params.token)
         x.release? x: null
     }
 
-    static def getRelease = { repo, version ->
+    static def getRelease = { repo, version, token ->
  
         MediaType mediaType = MediaType.parse("application/vnd.github+json")
         //TODO allow full URL
@@ -62,18 +60,22 @@ public class GitHubClient {
         if(version != "latest") {
             url = "https://api.github.com/repos/${repo}/releases/tags/${version}"
         }
-        Request request = new Request.Builder()
+        def requestBuilder = new Request.Builder()
             .url(url)
             .addHeader("Accept", "application/vnd.github+json")
             .addHeader("X-GitHub-Api-Version", "2022-11-28")
-            .build()
+
+        if (token && token.trim().length() >= 4) {
+            requestBuilder.addHeader("Authorization", "Bearer ${token.trim()}")
+        }
+
+        Request request = requestBuilder.build()
         def result = null
-        try(def response = okclient.newCall(request).execute()) {
+        try(def response = HttpClientProvider.getClient().newCall(request).execute()) {
             String content = response.body().string()
             Loggy.debug(GitHubClient, content)
             def code = response.code
-            def jsonSlurper = new JsonSlurper()
-            result = jsonSlurper.parseText(content)
+            result = JSON_SLURPER.parseText(content)
             if(code != 200)  {
                 throw new IOException("Could not find release ${version} on repository ${repo}. status: ${code}")
             }

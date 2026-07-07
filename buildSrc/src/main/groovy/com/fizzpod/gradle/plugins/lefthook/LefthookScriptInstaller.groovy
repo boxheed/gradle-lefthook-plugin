@@ -2,8 +2,6 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.lefthook
 
-import org.apache.commons.io.FileUtils
-
 public class LefthookScriptInstaller {
 
     private List<String> stack
@@ -63,7 +61,7 @@ public class LefthookScriptInstaller {
 
     static def httpDownloader = { url, file ->
         if(!file.exists()) {
-            FileUtils.copyURLToFile(new URL(url), file, 120000, 120000)
+            HttpClientProvider.downloadToFile(url, file)
         }
     }
 

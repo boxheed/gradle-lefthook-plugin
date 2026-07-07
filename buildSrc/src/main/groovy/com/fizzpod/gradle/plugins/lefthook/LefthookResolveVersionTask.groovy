@@ -35,6 +35,9 @@ public abstract class LefthookResolveVersionTask extends DefaultTask {
     @OutputFile
     abstract RegularFileProperty getResolvedVersionFile()
 
+    @org.gradle.api.tasks.Internal
+    abstract Property<String> getGithubToken()
+
     @Inject
     public LefthookResolveVersionTask(Project project) {
         def extension = project.extensions.getByType(LefthookPluginExtension)
@@ -43,6 +46,7 @@ public abstract class LefthookResolveVersionTask extends DefaultTask {
         getTtl().convention(86400000) // 1 day
         getVersionLocation().convention(extension.getLocation())
         getResolvedVersionFile().convention(getVersionLocation().file("version.txt"))
+        getGithubToken().convention(extension.getGithubToken())
     }
 
     static register(Project project) {
@@ -84,7 +88,8 @@ public abstract class LefthookResolveVersionTask extends DefaultTask {
                             getLefthookRepository().get(),
                             OS.getArch(null),
                             OS.getOs(null),
-                            "latest")
+                            "latest",
+                            getGithubToken().getOrElse(""))
             version = artifact.version
         } else {
             logger.info("Using configured lefthook version: {}", version)

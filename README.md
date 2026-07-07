@@ -59,6 +59,11 @@ lefthook {
     // The GitHub repository to fetch Lefthook binaries from
     repository = "evilmartians/lefthook" // Default is "evilmartians/lefthook"
 
+    // Optional GitHub personal access token to authenticate API calls (prevents rate limiting in CI)
+    // Default is resolved from the GITHUB_TOKEN or LEFTHOOK_GITHUB_TOKEN environment variables.
+    githubToken = "" 
+
+
     // Lefthook hook configuration. Maps directly to the generated lefthook.yml
     config = [
         "assert_lefthook_installed": true,
@@ -98,17 +103,17 @@ The downloaded/extracted scripts are stored under the respective hook's director
 
 The plugin registers the following tasks under the **Lefthook** group:
 
-| Task | Description |
-|---|---|
-| `lefthookResolveVersion` | Queries GitHub to resolve the concrete version for `"latest"` (cached with a 24-hour TTL in `version.txt`). |
-| `lefthookDownload` | Downloads and installs the versioned Lefthook binary matching the current OS and CPU architecture. |
-| `lefthookDownloadAll` | Downloads and caches Lefthook binaries for all supported platforms (Linux x86_64/ARM64, macOS x86_64/ARM64, Windows x86_64). |
-| `lefthookRc` | Generates the `.lefthookrc` environment shell wrapper (which points to the managed binary path and injects the `rc` string). |
-| `lefthookLocal` | Generates the project's root `lefthook-local.yml` file pointing to `.lefthookrc`. |
-| `lefthookYml` | Converts the configured `config` map into YAML and writes it to the root `lefthook.yml`. |
-| `lefthookInstall` | Runs the managed Lefthook binary to install hooks into `.git/hooks/`. (Depends on `lefthookRc`, `lefthookLocal`, and `lefthookYml`). |
-| `lefthookVersion` | Runs `lefthook version` and prints output to console. |
-| `lefthookHelp` | Runs `lefthook help` and prints output to console. |
+|           Task           |                                                             Description                                                              |
+|--------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| `lefthookResolveVersion` | Queries GitHub to resolve the concrete version for `"latest"` (cached with a 24-hour TTL in `version.txt`).                          |
+| `lefthookDownload`       | Downloads and installs the versioned Lefthook binary matching the current OS and CPU architecture.                                   |
+| `lefthookDownloadAll`    | Downloads and caches Lefthook binaries for all supported platforms (Linux x86_64/ARM64, macOS x86_64/ARM64, Windows x86_64).         |
+| `lefthookRc`             | Generates the `.lefthookrc` environment shell wrapper (which points to the managed binary path and injects the `rc` string).         |
+| `lefthookLocal`          | Generates the project's root `lefthook-local.yml` file pointing to `.lefthookrc`.                                                    |
+| `lefthookYml`            | Converts the configured `config` map into YAML and writes it to the root `lefthook.yml`.                                             |
+| `lefthookInstall`        | Runs the managed Lefthook binary to install hooks into `.git/hooks/`. (Depends on `lefthookRc`, `lefthookLocal`, and `lefthookYml`). |
+| `lefthookVersion`        | Runs `lefthook version` and prints output to console.                                                                                |
+| `lefthookHelp`           | Runs `lefthook help` and prints output to console.                                                                                   |
 
 ---
 
@@ -127,3 +132,4 @@ This project is licensed under the Apache 2.0 License. See the [LICENSE](file://
 ## 💡 Acknowledgments
 
 - [Lefthook](https://github.com/evilmartians/lefthook) - The ultra-fast Git hooks manager that powers this plugin.
+

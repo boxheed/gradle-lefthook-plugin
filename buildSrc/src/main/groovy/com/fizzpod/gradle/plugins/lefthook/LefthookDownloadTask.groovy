@@ -35,11 +35,15 @@ public abstract class LefthookDownloadTask extends DefaultTask {
     @OutputFile
     abstract RegularFileProperty getLefthookBinary()
 
+    @org.gradle.api.tasks.Internal
+    abstract Property<String> getGithubToken()
+
     @Inject
     public LefthookDownloadTask(Project project) {
         def extension = project.extensions.getByType(LefthookPluginExtension)
         getLefthookRepository().convention(extension.getRepository())
         getLefthookLocation().convention(extension.getLocation())
+        getGithubToken().convention(extension.getGithubToken())
 
         getLefthookBinary()
                 .set(
@@ -83,6 +87,7 @@ public abstract class LefthookDownloadTask extends DefaultTask {
         context.version = getResolvedVersionFile().getAsFile().get().text.trim()
         context.location = getLefthookLocation().getAsFile().get()
         context.binary = getLefthookBinary().get().asFile
+        context.token = getGithubToken().getOrElse("")
 
         if (!context.binary.exists()) {
             logger.lifecycle("Downloading Lefthook {} binary from {}...", context.version, context.repo)
@@ -102,7 +107,7 @@ public abstract class LefthookDownloadTask extends DefaultTask {
         // The version passed here is now always a concrete version
         def artifact =
                 LefthookInstallation.resolveArtifact(
-                        context.repo, context.arch, context.os, context.version)
+                        context.repo, context.arch, context.os, context.version, context.token)
         LefthookInstallation.downloadAndInstall(artifact.url, context.binary, context.os)
         return context
     }

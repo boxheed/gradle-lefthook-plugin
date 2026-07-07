@@ -44,12 +44,16 @@ public abstract class LefthookDownloadAllTask extends DefaultTask {
     @PathSensitive(PathSensitivity.RELATIVE)
     abstract DirectoryProperty getLefthookLocation()
 
+    @org.gradle.api.tasks.Internal
+    abstract Property<String> getGithubToken()
+
     @Inject
     public LefthookDownloadAllTask(Project project) {
         def providers = project.getProviders()
         def extension = project.extensions.getByType(LefthookPluginExtension)
         getLefthookRepository().convention(extension.getRepository())
         getLefthookLocation().convention(extension.getLocation())
+        getGithubToken().convention(extension.getGithubToken())
     }
 
     static register(Project project) {
@@ -73,6 +77,7 @@ public abstract class LefthookDownloadAllTask extends DefaultTask {
             context.version = version
             context.repo = getLefthookRepository().get()
             context.location = getLefthookLocation().getAsFile().get()
+            context.token = getGithubToken().getOrElse("")
 
             context.os = OS.getOs(osArch[0])
             context.arch = OS.getArch(osArch[1])
