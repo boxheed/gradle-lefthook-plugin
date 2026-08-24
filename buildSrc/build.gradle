@@ -6,7 +6,7 @@ dependencies {
 
   implementation 'commons-io:commons-io:2.22.0'
   implementation 'org.rauschig:jarchivelib:1.2.0'
-  implementation 'com.squareup.okhttp3:okhttp:5.4.0'
+  implementation 'com.squareup.okhttp3:okhttp:5.5.0'
   implementation 'org.yaml:snakeyaml:2.6'
   
   testImplementation('com.netflix.nebula:nebula-test:12.8.0') 
