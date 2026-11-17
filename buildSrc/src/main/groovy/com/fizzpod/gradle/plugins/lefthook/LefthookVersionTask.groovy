@@ -29,19 +29,12 @@ public abstract class LefthookVersionTask extends DefaultTask {
     @PathSensitive(PathSensitivity.RELATIVE)
     abstract RegularFileProperty getLefthookBinary()
 
-    @Inject
-    public LefthookVersionTask(Project project) {
-    }
-
     static register(Project project) {
         project.getLogger().info("Registering task {}", NAME)
-        def taskContainer = project.getTasks()
-
-        return taskContainer.create([name: NAME,
-            type: LefthookVersionTask,
-            dependsOn: [],
-            group: LefthookPlugin.GROUP,
-            description: 'Outputs the current lefthook version'])
+        return project.getTasks().register(NAME, LefthookVersionTask) { task ->
+            task.group = LefthookPlugin.GROUP
+            task.description = 'Outputs the current lefthook version'
+        }
     }
 
     @TaskAction

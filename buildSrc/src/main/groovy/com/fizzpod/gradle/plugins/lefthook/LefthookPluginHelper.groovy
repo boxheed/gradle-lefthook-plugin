@@ -15,6 +15,26 @@ import org.slf4j.LoggerFactory
 
 class LefthookPluginHelper {
 
+    static def resolveClosure = { File lefthookLocation, List stack, Closure closure ->
+        def installer = new LefthookScriptInstaller(lefthookLocation, stack)
+        closure.delegate = installer
+        closure.resolveStrategy = Closure.DELEGATE_FIRST
+        return closure.call()
+    }
+
+    static def resolveCollection = { File lefthookLocation, List stack, Collection source ->
+        return source.collect { item ->
+            if (item instanceof Closure) {
+                item = resolveClosure(lefthookLocation, stack, item)
+            }
+            if (item instanceof Map) {
+                return LefthookPluginHelper.resolve(lefthookLocation, stack, item)
+            } else if (item instanceof Collection) {
+                return resolveCollection(lefthookLocation, stack, item)
+            }
+            return item
+        }
+    }
 
     static def resolve = {File lefthookLocation, List stack, Map source ->
         
@@ -22,17 +42,11 @@ class LefthookPluginHelper {
         def result = source.inject([:]) { map, key, value ->
             Loggy.debug(LefthookPluginHelper, "inject {}, {}, {}", map, key, value)
             if(key instanceof Closure) {
-                def installer = new LefthookScriptInstaller(lefthookLocation, stack)
-                key.delegate = installer
-                key.resolveStrategy = Closure.DELEGATE_FIRST
-                key = key.call()
+                key = resolveClosure(lefthookLocation, stack, key)
                 Loggy.debug(LefthookPluginHelper, "key closure resolved to {}", key)
             }
             if(value instanceof Closure) {
-                def installer = new LefthookScriptInstaller(lefthookLocation, stack)
-                value.delegate = installer
-                value.resolveStrategy = Closure.DELEGATE_FIRST
-                value = value.call()
+                value = resolveClosure(lefthookLocation, stack, value)
                 Loggy.debug(LefthookPluginHelper, "value closure resolved to {}", value)
             }
             def localStack = stack + key
@@ -42,10 +56,8 @@ class LefthookPluginHelper {
                 def resolvedValue = LefthookPluginHelper.resolve(lefthookLocation, localStack, value)
                 Loggy.debug(LefthookPluginHelper, "value {} resolved to {}, assigning to {}", value, resolvedValue, key)
                 map[key] = resolvedValue
-                Loggy.debug(LefthookPluginHelper, "value {} is map, resolving", value)
             } else if (value instanceof Collection) {
-                //TODO check the contents of the collection for closures
-                map[key] = value
+                map[key] = resolveCollection(lefthookLocation, localStack, value)
             } else if(value != null) {
                 map[key] = value
             }

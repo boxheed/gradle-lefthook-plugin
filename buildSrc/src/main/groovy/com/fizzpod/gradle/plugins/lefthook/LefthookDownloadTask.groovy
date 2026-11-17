@@ -35,18 +35,17 @@ public abstract class LefthookDownloadTask extends DefaultTask {
     @OutputFile
     abstract RegularFileProperty getLefthookBinary()
 
+    @Input
+    @org.gradle.api.tasks.Optional
+    abstract Property<String> getConfiguredVersion()
+
     @org.gradle.api.tasks.Internal
     abstract Property<String> getGithubToken()
 
     @Inject
-    public LefthookDownloadTask(Project project) {
-        def extension = project.extensions.getByType(LefthookPluginExtension)
-        getLefthookRepository().convention(extension.getRepository())
-        getLefthookLocation().convention(extension.getLocation())
-        getGithubToken().convention(extension.getGithubToken())
-
+    public LefthookDownloadTask() {
         getLefthookBinary()
-                .set(
+                .convention(
                         getResolvedVersionFile()
                                 .zip(
                                         getLefthookLocation(),
@@ -55,7 +54,7 @@ public abstract class LefthookDownloadTask extends DefaultTask {
                                             def version =
                                                     file.exists()
                                                             ? file.text.trim()
-                                                            : extension.getVersion().get()
+                                                            : getConfiguredVersion().getOrElse("latest")
                                             def os = OS.getOs(null)
                                             def arch = OS.getArch(null)
                                             def name =
@@ -67,15 +66,15 @@ public abstract class LefthookDownloadTask extends DefaultTask {
 
     static register(Project project) {
         project.getLogger().info("Registering task {}", NAME)
-        def taskContainer = project.getTasks()
-
-        return taskContainer.create([
-            name: NAME,
-            type: LefthookDownloadTask,
-            dependsOn: [],
-            group: LefthookPlugin.GROUP,
-            description: 'Downloads and installs lefthook'
-        ])
+        def extension = project.extensions.getByType(LefthookPluginExtension)
+        return project.getTasks().register(NAME, LefthookDownloadTask) { task ->
+            task.group = LefthookPlugin.GROUP
+            task.description = 'Downloads and installs lefthook'
+            task.getLefthookRepository().convention(extension.getRepository())
+            task.getLefthookLocation().convention(extension.getLocation())
+            task.getGithubToken().convention(extension.getGithubToken())
+            task.getConfiguredVersion().convention(extension.getVersion())
+        }
     }
 
     @TaskAction

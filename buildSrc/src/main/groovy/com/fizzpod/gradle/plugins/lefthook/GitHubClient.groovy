@@ -75,10 +75,10 @@ public class GitHubClient {
             String content = response.body().string()
             Loggy.debug(GitHubClient, content)
             def code = response.code
-            result = JSON_SLURPER.parseText(content)
             if(code != 200)  {
                 throw new IOException("Could not find release ${version} on repository ${repo}. status: ${code}")
             }
+            result = JSON_SLURPER.parseText(content)
         }
         return result
   

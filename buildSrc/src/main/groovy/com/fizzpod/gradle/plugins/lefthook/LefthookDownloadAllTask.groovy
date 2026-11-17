@@ -40,33 +40,22 @@ public abstract class LefthookDownloadAllTask extends DefaultTask {
     @Input
     abstract Property<String> getLefthookRepository()
 
-    @InputDirectory
-    @PathSensitive(PathSensitivity.RELATIVE)
+    @OutputDirectory
     abstract DirectoryProperty getLefthookLocation()
 
     @org.gradle.api.tasks.Internal
     abstract Property<String> getGithubToken()
 
-    @Inject
-    public LefthookDownloadAllTask(Project project) {
-        def providers = project.getProviders()
-        def extension = project.extensions.getByType(LefthookPluginExtension)
-        getLefthookRepository().convention(extension.getRepository())
-        getLefthookLocation().convention(extension.getLocation())
-        getGithubToken().convention(extension.getGithubToken())
-    }
-
     static register(Project project) {
         project.getLogger().info("Registering task {}", NAME)
-        def taskContainer = project.getTasks()
-
-        return taskContainer.create([
-            name: NAME,
-            type: LefthookDownloadAllTask,
-            dependsOn: [],
-            group: LefthookPlugin.GROUP,
-            description: 'Download and install all lefthook binaries'
-        ])
+        def extension = project.extensions.getByType(LefthookPluginExtension)
+        return project.getTasks().register(NAME, LefthookDownloadAllTask) { task ->
+            task.group = LefthookPlugin.GROUP
+            task.description = 'Download and install all lefthook binaries'
+            task.getLefthookRepository().convention(extension.getRepository())
+            task.getLefthookLocation().convention(extension.getLocation())
+            task.getGithubToken().convention(extension.getGithubToken())
+        }
     }
 
     @TaskAction

@@ -44,7 +44,7 @@ public class LefthookScriptInstaller {
             .map(x -> LefthookScriptInstaller.resolveHookFile(x))
             .map(x -> LefthookScriptInstaller.download(x))
             .map(x -> LefthookScriptInstaller.createConfig(x))
-            .orElseThrow(() -> new RuntimeException("Unable to install " + resource))
+            .orElseThrow(() -> new RuntimeException("Unable to install " + context?.resource))
         return config
     })
 
@@ -73,6 +73,7 @@ public class LefthookScriptInstaller {
         }
         
         try {
+            file.getParentFile()?.mkdirs()
             resourceUrl.withInputStream { input ->
                 file.withOutputStream { output ->
                     output << input

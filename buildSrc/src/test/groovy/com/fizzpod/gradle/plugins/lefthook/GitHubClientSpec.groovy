@@ -143,4 +143,21 @@ class GitHubClientSpec extends Specification {
             def e = thrown(Exception)
             e instanceof IOException || e.cause instanceof IOException
     }
+
+    def "resolve throws IOException on non-JSON error response"() {
+        setup:
+            def response = createFakeResponse(502, '<html><body>Bad Gateway</body></html>')
+
+        when:
+            GitHubClient.resolve("evilmartians/lefthook", OS.Arch.AMD64, OS.Family.LINUX, "v5.0.0", "")
+
+        then:
+            1 * mockClient.newCall(_ as Request) >> mockCall
+            1 * mockCall.execute() >> response
+
+            def e = thrown(Exception)
+            def root = e instanceof IOException ? e : e.cause
+            root instanceof IOException
+            root.message.contains("status: 502")
+    }
 }

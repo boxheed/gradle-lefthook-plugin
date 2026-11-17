@@ -50,20 +50,18 @@ public abstract class LefthookInstallTask extends DefaultTask {
     abstract ProjectLayout getLayout()
 
     @Inject
-    public LefthookInstallTask(Project project) {
-        getGitHooksDir().convention(project.layout.projectDirectory.dir(".git/hooks"))
+    public LefthookInstallTask(ProjectLayout layout) {
+        getGitHooksDir().convention(layout.projectDirectory.dir(".git/hooks"))
     }
 
     static register(Project project) {
         project.getLogger().info("Registering task {}", NAME)
-        def taskContainer = project.getTasks()
-
-        return taskContainer.create([name: NAME,
-            type: LefthookInstallTask,
-            dependsOn: [LefthookRcTask.NAME, LefthookLocalTask.NAME, LefthookYmlTask.NAME],
-            group: LefthookPlugin.GROUP,
-            description: 'Installs the lefthook hooks into the git repository'])
+        return project.getTasks().register(NAME, LefthookInstallTask) { task ->
+            task.dependsOn(LefthookRcTask.NAME, LefthookLocalTask.NAME, LefthookYmlTask.NAME)
+            task.group = LefthookPlugin.GROUP
+            task.description = 'Installs the lefthook hooks into the git repository'
         }
+    }
 
     @TaskAction
     def runTask() {

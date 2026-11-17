@@ -3,6 +3,7 @@
 package com.fizzpod.gradle.plugins.lefthook
 
 import groovy.json.*
+import java.util.zip.GZIPInputStream
 import org.apache.commons.io.FileUtils
 import org.rauschig.jarchivelib.ArchiveFormat
 import org.rauschig.jarchivelib.ArchiverFactory
@@ -44,8 +45,12 @@ public class LefthookInstallation {
         tmp.deleteOnExit()
         HttpClientProvider.downloadToFile(url, tmp)
         if (url.endsWith(".gz")) {
-            def archiver = ArchiverFactory.createArchiver(CompressionType.GZIP)
-            archiver.extract(tmp, binary.getParentFile())
+            binary.getParentFile()?.mkdirs()
+            new GZIPInputStream(new FileInputStream(tmp)).withStream { input ->
+                binary.withOutputStream { output ->
+                    output << input
+                }
+            }
         } else if (url.endsWith(".zip")) {
             def archiver = ArchiverFactory.createArchiver(ArchiveFormat.ZIP)
             archiver.extract(tmp, binary.getParentFile())
