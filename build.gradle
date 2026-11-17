@@ -90,7 +90,7 @@ gradlePlugin {
   plugins {
     plugin {
       description = 'Gradle plugin to integrate lefthook into a gradle project.'
-      tags.set(['lefthook', 'git hooks', 'git', 'hooks'])
+      tags.set(['lefthook', 'git-hooks', 'git', 'hooks', 'commit', 'commit-hook'])
       id = 'com.fizzpod.lefthook'
       displayName = 'Gradle Lefthook Plugin'
       implementationClass = 'com.fizzpod.gradle.plugins.lefthook.LefthookPlugin'
