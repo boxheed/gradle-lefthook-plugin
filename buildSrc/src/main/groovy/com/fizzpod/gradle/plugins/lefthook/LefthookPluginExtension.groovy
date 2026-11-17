@@ -3,17 +3,14 @@
 package com.fizzpod.gradle.plugins.lefthook
 
 import javax.inject.Inject
-import org.gradle.api.Project
-import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.ProviderFactory
 
 public abstract class LefthookPluginExtension implements GroovyInterceptable {
-    
-    @Inject
-    protected abstract Project getProject()
 
     // Abstract property for Gradle to manage
     abstract MapProperty<String, Object> getConfig()
@@ -26,17 +23,17 @@ public abstract class LefthookPluginExtension implements GroovyInterceptable {
     abstract Property<String> getGithubToken()
 
     @Inject
-    public LefthookPluginExtension(ObjectFactory objects) {
+    public LefthookPluginExtension(ObjectFactory objects, ProjectLayout layout, ProviderFactory providers) {
         // Set convention for the managed property
         getConfig().convention([:])
         getAutoInstall().convention(false)
         getAutoTaskName().convention("assemble")
         getVersion().convention("latest")
-        getLocation().convention(getProject().layout.projectDirectory.dir(".lefthook"))
+        getLocation().convention(layout.projectDirectory.dir(".lefthook"))
         getRepository().convention("evilmartians/lefthook")
         getRc().convention("")
-        getGithubToken().convention(getProject().getProviders().environmentVariable("GITHUB_TOKEN")
-            .orElse(getProject().getProviders().environmentVariable("LEFTHOOK_GITHUB_TOKEN"))
+        getGithubToken().convention(providers.environmentVariable("GITHUB_TOKEN")
+            .orElse(providers.environmentVariable("LEFTHOOK_GITHUB_TOKEN"))
             .orElse(""))
     }
 }

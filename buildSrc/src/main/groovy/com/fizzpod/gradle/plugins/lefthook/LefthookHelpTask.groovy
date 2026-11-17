@@ -27,20 +27,13 @@ public abstract class LefthookHelpTask extends DefaultTask {
     @Inject
     abstract ExecOperations getExecOperations()
 
-    @Inject
-    public LefthookHelpTask(Project project) {
-    }
-
     static register(Project project) {
         project.getLogger().info("Registering task {}", NAME)
-        def taskContainer = project.getTasks()
-
-        return taskContainer.create([name: NAME,
-            type: LefthookHelpTask,
-            dependsOn: [],
-            group: LefthookPlugin.GROUP,
-            description: 'Outputs the lefthook help'])
+        return project.getTasks().register(NAME, LefthookHelpTask) { task ->
+            task.group = LefthookPlugin.GROUP
+            task.description = 'Outputs the lefthook help'
         }
+    }
 
     @TaskAction
     def runTask() {

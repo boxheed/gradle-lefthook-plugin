@@ -39,26 +39,22 @@ public abstract class LefthookResolveVersionTask extends DefaultTask {
     abstract Property<String> getGithubToken()
 
     @Inject
-    public LefthookResolveVersionTask(Project project) {
-        def extension = project.extensions.getByType(LefthookPluginExtension)
-        getLefthookVersion().convention(extension.getVersion())
-        getLefthookRepository().convention(extension.getRepository())
-        getTtl().convention(86400000) // 1 day
-        getVersionLocation().convention(extension.getLocation())
+    public LefthookResolveVersionTask() {
+        getTtl().convention(86400000L) // 1 day
         getResolvedVersionFile().convention(getVersionLocation().file("version.txt"))
-        getGithubToken().convention(extension.getGithubToken())
     }
 
     static register(Project project) {
         project.getLogger().info("Registering task {}", NAME)
-        def taskContainer = project.getTasks()
-
-        return taskContainer.create([
-            name: NAME,
-            type: LefthookResolveVersionTask,
-            group: LefthookPlugin.GROUP,
-            description: "Resolves the 'latest' lefthook version from GitHub with TTL caching"
-        ])
+        def extension = project.extensions.getByType(LefthookPluginExtension)
+        return project.getTasks().register(NAME, LefthookResolveVersionTask) { task ->
+            task.group = LefthookPlugin.GROUP
+            task.description = "Resolves the 'latest' lefthook version from GitHub with TTL caching"
+            task.getLefthookVersion().convention(extension.getVersion())
+            task.getLefthookRepository().convention(extension.getRepository())
+            task.getVersionLocation().convention(extension.getLocation())
+            task.getGithubToken().convention(extension.getGithubToken())
+        }
     }
 
     @TaskAction

@@ -29,8 +29,7 @@ public abstract class LefthookRcTask extends DefaultTask {
     @PathSensitive(PathSensitivity.RELATIVE)
     abstract RegularFileProperty getLefthookBinary()
 
-    @InputDirectory
-    @PathSensitive(PathSensitivity.RELATIVE)
+    @Internal
     abstract DirectoryProperty getLefthookLocation()
 
     @Input
@@ -40,28 +39,20 @@ public abstract class LefthookRcTask extends DefaultTask {
     abstract RegularFileProperty getLefthookRcFile()
 
     @Inject
-    public LefthookRcTask(Project project) {
-        def extension = project.extensions.getByType(LefthookPluginExtension)
-        def providers = project.getProviders()
-        getLefthookLocation().convention(extension.getLocation())
-        getRcConfiguration().convention(extension.getRc())
-        getLefthookRcFile().fileProvider(providers.provider({
-                File dirFile = getLefthookLocation().getAsFile().get()
-                return new File(dirFile, ".lefthookrc")
-            })
-        )
+    public LefthookRcTask() {
+        getLefthookRcFile().convention(getLefthookLocation().file(".lefthookrc"))
     }
 
     static register(Project project) {
         project.getLogger().info("Registering task {}", NAME)
-        def taskContainer = project.getTasks()
-
-        return taskContainer.create([name: NAME,
-            type: LefthookRcTask,
-            dependsOn: [],
-            group: LefthookPlugin.GROUP,
-            description: 'Creates the .lefthookrc file'])
+        def extension = project.extensions.getByType(LefthookPluginExtension)
+        return project.getTasks().register(NAME, LefthookRcTask) { task ->
+            task.group = LefthookPlugin.GROUP
+            task.description = 'Creates the .lefthookrc file'
+            task.getLefthookLocation().convention(extension.getLocation())
+            task.getRcConfiguration().convention(extension.getRc())
         }
+    }
 
     @TaskAction
     def runTask() {

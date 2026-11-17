@@ -5,6 +5,7 @@ package com.fizzpod.gradle.plugins.lefthook
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFile
@@ -27,20 +28,18 @@ public abstract class LefthookLocalTask extends DefaultTask {
     abstract RegularFileProperty getLefthookLocalFile()
 
     @Inject
-    public LefthookLocalTask(Project project) {
+    public LefthookLocalTask(ProjectLayout layout) {
         // Convention for output file is project root/lefthook-local.yml
-        getLefthookLocalFile().convention(project.layout.projectDirectory.file("lefthook-local.yml"))
+        getLefthookLocalFile().convention(layout.projectDirectory.file("lefthook-local.yml"))
     }
 
     static register(Project project) {
         project.getLogger().info("Registering task {}", NAME)
-        def taskContainer = project.getTasks()
-
-        return taskContainer.create([name: NAME,
-            type: LefthookLocalTask,
-            dependsOn: [LefthookRcTask.NAME],
-            group: LefthookPlugin.GROUP,
-            description: 'Creates the lefthook-local.yml file'])
+        return project.getTasks().register(NAME, LefthookLocalTask) { task ->
+            task.dependsOn(LefthookRcTask.NAME)
+            task.group = LefthookPlugin.GROUP
+            task.description = 'Creates the lefthook-local.yml file'
+        }
     }
 
     @TaskAction
