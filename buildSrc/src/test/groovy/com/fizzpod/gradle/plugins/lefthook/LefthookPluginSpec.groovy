@@ -154,6 +154,36 @@ class LefthookPluginSpec extends Specification {
             !project.getTasksByName(LefthookRcTask.NAME, false).isEmpty()
     }
 
+    def "autoInstall attaches lefthookInstall to configured task when task exists"() {
+        setup:
+            Project project = ProjectBuilder.builder().withProjectDir(temporaryFolder.getRoot()).build()
+            def assembleTask = project.tasks.register("assemble").get()
+            def plugin = new LefthookPlugin()
+            plugin.apply(project)
+            project.extensions.getByType(LefthookPluginExtension).autoInstall.set(true)
+
+        when:
+            project.evaluate()
+
+        then:
+            assembleTask.taskDependencies.getDependencies(assembleTask).any { it.name == LefthookInstallTask.NAME }
+    }
+
+    def "autoInstall does not fail when configured autoTaskName does not exist"() {
+        setup:
+            Project project = ProjectBuilder.builder().withProjectDir(temporaryFolder.getRoot()).build()
+            def plugin = new LefthookPlugin()
+            plugin.apply(project)
+            def ext = project.extensions.getByType(LefthookPluginExtension)
+            ext.autoInstall.set(true)
+            ext.autoTaskName.set("missingTask")
+
+        when:
+            project.evaluate()
+
+        then:
+            noExceptionThrown()
+    }
     
     
     

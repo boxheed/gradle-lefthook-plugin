@@ -29,7 +29,18 @@ public class LefthookPluginHelperSpec extends Specification {
         ["abc":["xyz":{["hjk":"hyt"]}]] | ["abc":["xyz":["hjk":"hyt"]]]
         ["abc":["xyz":{["hjk":{"hyt"}]}]] | ["abc":["xyz":["hjk":"hyt"]]]
         ["abc":["xyz":{[{"hjk"}:{"hyt"}]}]] | ["abc":["xyz":["hjk":"hyt"]]]
+        ["list": [{"a"}, "b", ["c": {"d"}], [["e"]]]] | ["list": ["a", "b", ["c": "d"], [["e"]]]]
+        ["skipNull": null, "keep": "val"] | ["keep": "val"]
 
+    }
+
+    def "resolve propagates exception from failing closure"() {
+        when:
+        LefthookPluginHelper.resolve(temporaryFolder.getRoot(), [], ["list": [{ throw new IllegalStateException("boom") }]])
+
+        then:
+        def e = thrown(IllegalStateException)
+        e.message == "boom"
     }
 
 
