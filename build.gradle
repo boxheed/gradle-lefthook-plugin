@@ -15,6 +15,12 @@ buildscript {
   }
 }
 
+plugins.withId('com.fizzpod.git-semver') {
+  gitSemver {
+    stable = false
+  }
+}
+
 apply plugin: 'com.fizzpod.pater-build'
 apply plugin: 'com.fizzpod.lefthook'
 apply from: './buildSrc/build.gradle'
@@ -73,10 +79,6 @@ lefthook {
       ]
     ]
   
-}
-
-gitSemver {
-  stable = false
 }
 
 dependencies {
