@@ -17,8 +17,8 @@ The Gradle Lefthook Plugin integrates [Lefthook](https://github.com/evilmartians
 
 ## 📋 Requirements
 
-- **Java**: 11 or higher
-- **Gradle**: 5.0 or higher
+- **Java**: 17 or higher
+- **Gradle**: 8.0 or higher
 - **Git**: A git repository initialized in the project directory
 
 ---
@@ -29,7 +29,7 @@ Apply the plugin to your `build.gradle`:
 
 ```groovy
 plugins {
-    id 'com.fizzpod.lefthook' version '0.3.0'
+    id 'com.fizzpod.lefthook' version '0.8.1'
 }
 ```
 
